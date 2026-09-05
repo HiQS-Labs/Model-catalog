@@ -190,7 +190,11 @@ vendor-default-not-flagship deviation as data (a note in README), not silently.
 
 ### Phase 2 — AEGIS-Sleuth consumes (decided: build-time sync — relay QA r2 F6)
 
-1. Land GH-168's resolver (already planned there) reading `ModelAliases` from a **build-time sync**
+> Update 2026-09-05: GH-168 **shipped** (closed completed) — `ResolveModelAlias` is live over the
+> hand-maintained rows. Phase 2 is therefore a **conversion**: point the shipped resolver's table
+> input at the synced catalog, not a from-scratch build. Build-out issue: AEGIS-Sleuth-Slackbot#173.
+
+1. The shipped resolver (GH-168) reads `ModelAliases` from a **build-time sync**
    of this catalog's `target: "native"` rows into `data/static/ai/command-normalization.json`,
    the synced rows **carrying GH-168's optional provenance columns** (`Source`, `VerifiedOn`,
    `Flags`), which the loader already ignores. This mirrors Phase 1's shape — generated data file,
