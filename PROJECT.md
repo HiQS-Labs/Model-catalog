@@ -28,8 +28,8 @@ zero shared state:
 2. **AEGIS-Sleuth** — `data/static/ai/command-normalization.json` → `ModelAliases`: 53
    entire-value pins mapping colloquial names/vendor words to **provider-native IDs**
    (`chatgpt` → `gpt-5.6-terra`, `sonnet` → `claude-sonnet-5`), seeded by an operator-supplied
-   Perplexity pass (GH-168 Rev 4). Its GH-168 resolver (status: Proposed) will consume this table
-   with a refusal-on-unknown contract.
+   Perplexity pass (GH-168 Rev 4). Its GH-168 resolver **shipped 2026-09-05** (issue closed
+   completed) and consumes this table with a refusal-on-unknown contract today.
 3. **Nothing** records *when* a pin was last verified against a live catalog, or where it came
    from. The one known-stale row (`gemini pro` → `gemini-2.5-pro`, flagged in GH-168 Rev 4) is
    flagged only in a doc, not in the data.
@@ -100,7 +100,7 @@ Field contract:
 | `target` | yes | Which ID space `replace` lives in: `native` (provider-native) or `openrouter` (OpenRouter slug). Consumers filter on this; an `openrouter` row must never resolve for a native-ID consumer and vice versa. |
 | `provider` | yes | Owning provider of `replace` (openai, anthropic, google, deepseek, z-ai, nvidia, x-ai, qwen, stealth, …). |
 | `source` | yes | Where the pin came from (file + issue/PR). Every row must name its provenance. |
-| `verified_on` | no | Last date the pin was checked against a live catalog. Backfilled `2026-09-04` **only for the seven Sleuth-native pins re-verified in GH-168 Rev 4, each with a per-pin source URL recorded**; the other 46 bulk-seeded Sleuth pins and all seven XYZ OpenRouter rows stay `null` (relay QA r2 F1: a bulk pass without per-pin evidence does not qualify; "Rev 4" in Sleuth's history must not be read as covering all 53). Rule: `verified_on` requires recorded per-pin evidence. A row flagged `unverified-generation` must have `verified_on: null` — a known-questionable pin claiming a verification date is false precision (relay QA r1); a row flagged `disputed` **keeps** its verify date, and the dispute date lives in the PR/commit history (relay QA r2 F11). |
+| `verified_on` | no | Last date the pin was checked against a live catalog. Backfilled `2026-09-04` for the **31 rows whose `replace` is one of the six non-flagged Rev-4 pins** (six distinct first-party URLs, one per pinned ID); the flagged pin's rows (`gemini pro` / `gemini 2.5 pro` → `gemini-2.5-pro`) stay `null` per the flagged rule; the remaining **29 rows** (20 pre-GH-168 native + 7 XYZ openrouter) stay `null`. Rule: a dated row requires recorded per-ID evidence — a bulk pass qualifies only when each pinned ID carries its own source URL. (Coordination relay r3 S1 corrected this field's earlier "seven pins / 46 rows" arithmetic, which conflated pins with rows: v1.0.0 data = 31 dated / 29 null across 53 native + 7 openrouter.) A row flagged `unverified-generation` must have `verified_on: null` — a known-questionable pin claiming a verification date is false precision (relay QA r1); a row flagged `disputed` **keeps** its verify date, and the dispute date lives in the PR/commit history (relay QA r2 F11). |
 | `flags` | no | Machine-readable caveats. v1 vocabulary: `unverified-generation` (carried but flagged for review, e.g. `gemini pro` → `gemini-2.5-pro`), `disputed` (two consumers disagree — see Governance; resolves per the row as it stands, contract item 6). |
 
 Schema rules (enforced by this repo's CI, `scripts/validate_catalog.py`): valid JSON per schema;
@@ -165,7 +165,9 @@ vendor-default-not-flagship deviation as data (a note in README), not silently.
 1. Add a **sync/compile step** that renders `data/catalog.json`'s `target: "openrouter"` rows into
    the legacy `alias: slug` YAML at `relay-automation/openrouter-model-aliases.yml`, as a
    **generated file** (header: "generated from HiQS-Labs/Model-catalog vX.Y.Z — edit the catalog,
-   not this file"). Catalog repo ships the renderer at the pinned tag. Decided shape (relay QA
+   not this file"). The renderer ships HERE: `scripts/render_openrouter.py` (coordination relay
+   r3 B3 — it was previously assigned to this repo but untracked). Deterministic order: squash-length
+   of `match` descending, then lexicographic. Decided shape (relay QA
    r2 F4): XYZ vendors `catalog.json` **byte-identical to the upstream tag** at
    `relay-automation/model-catalog/catalog.json` with a **pin record (tag + sha256)** beside it
    that CI verifies, closing the copy↔upstream edge no drift check can otherwise see; the drift
@@ -255,8 +257,8 @@ freshness signal.
   swaps a generated artifact behind the existing compile-to-YAML shape, and the drift check plus
   retained hand-written assertions are strictly *more* coverage than today's hand-add flow
   (relay QA r2 F3). Undo = revert the PR; day-or-less.
-- **Phase 2 (Sleuth):** additive — GH-168 is not yet implemented, so nothing live changes; the
-  catalog just becomes its input. Easy.
+- **Phase 2 (Sleuth):** additive — the GH-168 resolver is already live over hand-maintained rows;
+  the catalog only changes that table's source (build-time sync), so no runtime path changes. Easy.
 - **Phase 3:** not attempted; n/a.
 
 ## Non-goals

@@ -17,6 +17,9 @@ and a repo disagree, the repo's own tracker wins — then fix this page.
 | Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — 2 relay rounds folded |
 | Catalog data v1.0.0 | [data/catalog.json](data/catalog.json) | 60 rows (53 native / 7 openrouter) |
 | Schema validator | [scripts/validate_catalog.py](scripts/validate_catalog.py) | Fuzz-hardened; `python3 scripts/validate_catalog.py` must exit 0 |
+| OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it |
+| CI | [.github/workflows/catalog-validate.yml](.github/workflows/catalog-validate.yml) | Validator + renderer smoke + version-bump enforcement on catalog PRs |
+| Release tag | `v1.0.0` (this repo) | Tags the Phase 0 close; consumers pin this exact tag |
 | License | [LICENSE](LICENSE) (MIT, code/docs) · [data/LICENSE](data/LICENSE) (CC0-1.0, data) | Decided 2026-09-05 |
 | **Phase 1 build-out (XYZ-forge)** | [XYZ-forge#450](https://github.com/HiQS-Labs/XYZ-forge/issues/450) | Pending — not started |
 | XYZ-forge parent context | [XYZ-forge#346](https://github.com/HiQS-Labs/XYZ-forge/issues/346) (+ [r2 findings comment](https://github.com/HiQS-Labs/XYZ-forge/issues/346#issuecomment-5553629381)) | Open |
@@ -44,14 +47,18 @@ and a repo disagree, the repo's own tracker wins — then fix this page.
 1. **XYZ-forge:** review + merge [PR #449](https://github.com/HiQS-Labs/XYZ-forge/pull/449)
    (GH-448). Independent of Phase 1, but every dsh lane run before it lands records the wrong
    executed model in telemetry.
-2. **XYZ-forge:** execute #450 (Phase 1) — vendor, renderer, drift check, guard test, telemetry
-   version. Accept criteria in the issue and PROJECT.md Phase 1.
+2. **XYZ-forge:** execute #450 (Phase 1) — vendor the `v1.0.0` tag, render the YAML with
+   `scripts/render_openrouter.py` (shipped here at the pinned tag), wire the drift check + tier-4
+   guard test + telemetry version. Accept criteria in the issue and PROJECT.md Phase 1.
 3. **AEGIS-Sleuth:** execute #173 (Phase 2) — build-time sync of native rows + provenance-aware
    `run-diagnostics` pin audit. The resolver itself already shipped (#168); this only changes its
    table input.
 4. **Both consumers:** after first sync, record catalog version in resolution provenance; then
    future model additions are: PR row here → tag → per-consumer sync PR.
 5. **Parked:** gateway/service (Phase 3) — revisit only on a concrete routing/auth/failover need.
+
+_(Coordination relay r3 B1–B3 resolved 2026-09-05: `v1.0.0` tagged, CI wired, renderer shipped —
+the review's three blockers are closed in the same pass as this line.)_
 
 ## Known loose ends
 

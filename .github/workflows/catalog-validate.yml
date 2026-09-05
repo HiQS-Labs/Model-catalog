@@ -1,0 +1,38 @@
+name: catalog-validate
+
+on:
+  push:
+    branches: [main]
+    paths: ["data/**", "scripts/**", ".github/workflows/catalog-validate.yml"]
+  pull_request:
+    paths: ["data/**", "scripts/**", ".github/workflows/catalog-validate.yml"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Schema rules (uniqueness, vocabulary, dates, tier-4 capture)
+        run: python3 scripts/validate_catalog.py
+      - name: Renderer runs clean and emits exactly the openrouter rows
+        run: |
+          out="$(python3 scripts/render_openrouter.py)"
+          echo "$out"
+          want="$(python3 -c 'import json; print(sum(1 for r in json.load(open("data/catalog.json"))["aliases"] if r["target"]=="openrouter"))')"
+          got="$(echo "$out" | grep -c '^[a-z0-9].*: ' || true)"
+          [ "$got" = "$want" ] || { echo "renderer emitted $got rows, catalog has $want"; exit 1; }
+      - name: Catalog changes require a version bump
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --depth=1 origin "${{ github.base_ref }}"
+          base_version="$(git show "origin/${{ github.base_ref }}:data/catalog.json" 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])' 2>/dev/null || echo none)"
+          head_version="$(python3 -c 'import json; print(json.load(open("data/catalog.json"))["version"])')"
+          echo "base=$base_version head=$head_version"
+          changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/catalog.json || true)"
+          if [ -n "$changed" ] && [ "$base_version" = "$head_version" ]; then
+            echo "FAIL: data/catalog.json changed but version stayed $head_version (see PROJECT.md → Versioning)"
+            exit 1
+          fi

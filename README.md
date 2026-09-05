@@ -41,6 +41,13 @@ catalog, which is not this repo's concern.
 3. No network at resolution time.
 4. Record which catalog version resolved a turn (provenance).
 5. Exact model IDs are never declared keys, so they always pass through untouched.
+6. **Flagged rows resolve normally.** `flags` are advisory metadata (logged, surfaced in
+   diagnostics), never a refusal reason — both consumers must behave identically on flagged rows.
+
+Known deviations carried as data (not silently): bare `gpt` is pinned to the vendor default
+`gpt-5.6-terra`, not the flagship `gpt-6-astra` (which has its own explicit rows) — the everyday
+model for a bare word, per the GH-168 operator decision; the `gemini pro` rows are flagged
+`unverified-generation`.
 
 ## Changing the catalog
 
