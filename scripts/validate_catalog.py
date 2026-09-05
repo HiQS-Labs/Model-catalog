@@ -6,6 +6,7 @@ The point of this file is that the schema rules in PROJECT.md are CHECKED, not
 prose: uniqueness under both consumers' normalizations, vocabulary limits, and
 the flagged-rows-carry-no-verify-date rule all fail loudly here.
 """
+import datetime
 import json
 import re
 import sys
@@ -62,8 +63,13 @@ def main() -> int:
         if not isinstance(flags, list) or not set(flags) <= FLAGS:
             return fail(f"{where}: flags {flags!r} not a subset of {sorted(FLAGS)}")
         vo = r.get("verified_on")
-        if vo is not None and not DATE.match(vo):
-            return fail(f"{where}: verified_on {vo!r} must be null or YYYY-MM-DD")
+        if vo is not None:
+            if not DATE.match(vo):
+                return fail(f"{where}: verified_on {vo!r} must be null or YYYY-MM-DD")
+            try:
+                datetime.date.fromisoformat(vo)  # catches 2026-13-99 — right shape, not a date
+            except ValueError:
+                return fail(f"{where}: verified_on {vo!r} is not a real calendar date")
         if flags and vo:
             return fail(f"{where}: flagged row ({flags}) must carry verified_on: null, not {vo!r}")
         if vo is None and "verified_on" not in r:
