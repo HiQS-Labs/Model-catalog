@@ -2,7 +2,7 @@
 gh_issue: 1
 source: https://github.com/HiQS-Labs/Model-catalog/issues/1
 title: "Model-catalog — one versioned alias/pin catalog feeding the XYZ-forge and AEGIS-Sleuth resolvers"
-status: Reviewed (3 relay rounds folded; Phases 1–2 ready to execute)
+status: Reviewed (plan QA ×2 + coordination ×4 relay cycles folded; Phases 1–2 ready to execute)
 created: 2026-09-05
 owner: noel
 doc_type: plan
@@ -172,8 +172,7 @@ vendor-default-not-flagship deviation as data (a note in README), not silently.
    `relay-automation/model-catalog/catalog.json` with a **pin record (tag + sha256)** beside it
    that CI verifies, closing the copy↔upstream edge no drift check can otherwise see; the drift
    check re-renders the committed YAML from the committed copy
-   (`python3 scripts/render_openrouter.py --catalog relay-automation/model-catalog/catalog.json`)
-   (`python3 scripts/render_openrouter.py --catalog relay-automation/model-catalog/catalog.json`)
+   (run from the XYZ-forge root, against a Model-catalog checkout at `d5b2262` or later — the `v1.0.0`-tagged renderer predates `--catalog` and silently ignores it, harmless only while the vendored copy is byte-identical to tag data: `python3 <model-catalog-checkout>/scripts/render_openrouter.py --catalog relay-automation/model-catalog/catalog.json`)
    and demands byte equality.
 2. **Leave `resolve-model-alias.sh` untouched** (relay QA r1: a Bash shim parsing JSON invites
    fragile hand-rolled parsing and GH-551 adjacency; the compile-to-YAML shape keeps the resolver,
@@ -234,7 +233,7 @@ Semver on a data file, judged by what the change does to resolution:
 
 Rules: consumers pin **exact** versions (the two-PR governance already presumes it); every release
 is **git-tagged** so "resolved by catalog vX.Y.Z" names an immutable commit; catalog CI rejects a
-`data/catalog.json` change that does not bump both `version` and `updated`; sync PRs are event-driven
+`data/catalog.json` change (on pull_request; a direct maintainer push bypasses it — tagging is the release act) that does not bump both `version` and `updated`; sync PRs are event-driven
 (consumer needs a row; dispute adjudicated; MAJOR upgrade), plus a periodic `verified_on`-age audit
 on **both** consumer sides — XYZ's 7 rows otherwise sit `verified_on: null` forever with no
 freshness signal.
@@ -289,16 +288,6 @@ Raw block: XYZ-forge `relay-system/2026-09-05/model-catalog-plan-qa-agy.md` (unc
 structural validator rejected the block's `**Verdict:**` formatting, exit 8, after the content was
 written; content reviewed and folded manually).
 
-### Relay r3 — coordination QA (DeepSeek harness / qwen3.8-max), 2026-09-05: FAIL → producer pass → re-review
-
-Two-round coordination review of COORDINATION.md + all linked artifacts. Round 1 `VERDICT: FAIL`
-with three verified blockers, all closed in `75e1913` (tag `v1.0.0` actually cut; CI actually wired —
-`catalog-validate` green on first run; renderer actually shipped + named in #450) plus S1–S3/N1–N2.
-Round 2 confirmed all closures (cold-start walk of #450 and #173 passes end-to-end) and swept a
-second tier — S4 null-breakdown arithmetic, S5 CI overclaim on `updated`, S6 hand-append-flow
-retirement, N3 duplicate-row tolerance, N4 drift-check recipe, N5 review-record staleness — folded
-in the same pass. Raw blocks: XYZ-forge `relay-system/2026-09-05/model-catalog-coordination-qa.md`.
-
 ### Relay r2 — DeepSeek harness / Alibaba Token Plan / qwen3.8-max, 2026-09-05: Changes requested (folded)
 
 Sharpening pass; no blockers, architecture endorsed ([Pass] F13–F15). Folded: F1 `verified_on`
@@ -315,3 +304,13 @@ findings accepted. Raw block: XYZ-forge
 `relay-system/2026-09-05/model-catalog-plan-qa-qwen.md` (uncommitted at review time — the shim's
 structural validator rejected the block's `VERDICT:` placement, exit 8, after the content was
 written; folded manually).
+
+### Relay r3 — coordination QA (DeepSeek harness / qwen3.8-max), 2026-09-05: FAIL → producer pass → re-review
+
+Two-round coordination review of COORDINATION.md + all linked artifacts. Round 1 `VERDICT: FAIL`
+with three verified blockers, all closed in `75e1913` (tag `v1.0.0` actually cut; CI actually wired —
+`catalog-validate` green on first run; renderer actually shipped + named in #450) plus S1–S3/N1–N2.
+Round 2 confirmed all closures (cold-start walk of #450 and #173 passes end-to-end) and swept a
+second tier — S4 null-breakdown arithmetic, S5 CI overclaim on `updated`, S6 hand-append-flow
+retirement, N3 duplicate-row tolerance, N4 drift-check recipe, N5 review-record staleness — folded in the same pass; round 3 then swept S7–S8/N6–N8 (folded; see `d5b2262` and the
+closing commit). Raw blocks: XYZ-forge `relay-system/2026-09-05/model-catalog-coordination-qa.md`.

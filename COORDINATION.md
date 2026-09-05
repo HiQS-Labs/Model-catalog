@@ -72,8 +72,10 @@ the review's three blockers are closed in the same pass as this line.)_
 
 ## Contribution flow (the standing answer to "how do I add a model?")
 
-1. PR a row to `data/catalog.json` (all fields; `source` = first-party provider URL; set
-   `verified_on` only with real verification; flag genuinely-questionable rows).
-2. CI validates (uniqueness under both normalizations, tier-4 capture, vocabulary, dates).
-3. Maintainer bumps `version` + tags (MAJOR/MINOR/PATCH per PROJECT.md → Versioning).
+1. PR a row to `data/catalog.json` **with `version` + `updated` bumped in the same PR** (all
+   fields; `source` = first-party provider URL; set `verified_on` only with real verification;
+   flag genuinely-questionable rows). CI rejects a catalog PR that skips the bump; MAJOR/MINOR/
+   PATCH per PROJECT.md → Versioning.
+2. CI validates (uniqueness under both normalizations, tier-4 capture, vocabulary, dates, bump).
+3. Maintainer reviews and tags the release.
 4. Per consumer: a small sync PR (XYZ re-renders YAML; Sleuth re-syncs `ModelAliases`).

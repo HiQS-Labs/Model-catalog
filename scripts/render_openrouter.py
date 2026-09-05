@@ -31,7 +31,8 @@ def main() -> int:
     lines = [
         f"# GENERATED from HiQS-Labs/Model-catalog v{catalog['version']} — edit the catalog, not this file.",
         "# Legacy format (GH-120): `alias: canonical-slug`, consumed by resolve-model-alias.sh.",
-        "# Regenerate: python3 scripts/render_openrouter.py > relay-automation/openrouter-model-aliases.yml",
+        "# Regenerate with Model-catalog's scripts/render_openrouter.py --catalog <vendored catalog.json>",
+        "#   (run from anywhere; see Model-catalog PROJECT.md Phase 1 for the drift-check recipe).",
     ]
     for r in rows:
         lines.append(f"{r['match']}: {r['replace']}")

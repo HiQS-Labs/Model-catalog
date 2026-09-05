@@ -51,12 +51,14 @@ model for a bare word, per the GH-168 operator decision; the `gemini pro` rows a
 
 ## Changing the catalog
 
-1. PR a row here (all fields, honest `source`; verify against the provider's first-party model
-   page if you can and set `verified_on`).
+1. PR a row here **with `version` + `updated` bumped in the same PR** (all fields, honest
+   `source`; verify against the provider's first-party model page and set `verified_on` when
+   real) — CI rejects a catalog PR that skips the bump.
 2. CI validates the schema rules (`scripts/validate_catalog.py`): uniqueness under both
-   consumers' normalizations, vocabulary limits, flagged rows carry no verify date.
-3. A maintainer bumps `version` and tags; each consumer then PRs its own pin-bump/sync. Two PRs
-   of friction is the deliberate price of pinned provenance — see PROJECT.md → Governance.
+   consumers' normalizations, tier-4 capture, vocabulary limits, flagged rows carry no verify
+   date, calendar-date validity.
+3. A maintainer reviews and tags the release; each consumer then PRs its own pin-bump/sync. Two
+   PRs of friction is the deliberate price of pinned provenance — see PROJECT.md → Governance.
 
 ## Versioning
 
