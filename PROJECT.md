@@ -236,9 +236,9 @@ freshness signal.
   `flags: ["disputed"]` and the operator arbitrates; consumers resolve per the row as it stands.
 - **Contribution flow costs two PRs** (row here, then a version-bump/sync PR per consumer). That is
   the deliberate price of pinned provenance; do not "fix" it with auto-sync or a live feed.
-- **License is a decision this repo cannot ship without** (relay QA r2 F8): a data-only public repo
-  with no license is legally unvendorable by either consumer. Operator decision required — proposal:
-  CC0-1.0 for the data, MIT for `scripts/`. Until chosen, this is the standing Phase 0 blocker.
+- **License — DECIDED (operator, 2026-09-05):** CC0-1.0 for the data (`data/LICENSE`), MIT for
+  code and docs (`LICENSE`). This clears the relay-r2-F8 blocker: a public data-only repo with no
+  license is legally unvendorable by either consumer.
   External-row evidence bar: `source` = first-party provider URL; every `source` string must be
   publicly resolvable (no private-repo issue refs).
 

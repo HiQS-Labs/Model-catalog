@@ -65,9 +65,12 @@ Every release is git-tagged; consumers pin an **exact** version and record it wi
 
 ## License
 
-**TBD — operator decision, currently the standing Phase 0 blocker** (a data-only public repo with
-no license is legally unvendorable by its consumers; see PROJECT.md → Governance). Proposal on the
-table: CC0-1.0 for the data, MIT for `scripts/`.
+- **Data** (`data/`): [CC0 1.0](data/LICENSE) — the catalog is public domain; vendor it without
+  obligation.
+- **Code & docs** (everything else, including `scripts/`): [MIT](LICENSE).
+
+Split licensing so the data feed stays friction-free for consumers while the tooling keeps its
+attribution.
 
 ## Status
 
