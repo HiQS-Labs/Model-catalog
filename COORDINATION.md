@@ -14,10 +14,10 @@ and a repo disagree, the repo's own tracker wins — then fix this page.
 | Artifact | Where | State |
 |---|---|---|
 | Umbrella tracker (Phases 0–3) | [Model-catalog#1](https://github.com/HiQS-Labs/Model-catalog/issues/1) | Phase 0 ✅ · P1/P2 pending · P3 parked |
-| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — 3 relay rounds folded (r1 agy · r2/r3 qwen3.8-max) |
+| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — plan QA ×2 + coordination ×4 relay cycles folded (r1 agy · r2–r4 qwen3.8-max) |
 | Catalog data v1.0.0 | [data/catalog.json](data/catalog.json) | 60 rows (53 native / 7 openrouter) |
 | Schema validator | [scripts/validate_catalog.py](scripts/validate_catalog.py) | Fuzz-hardened; `python3 scripts/validate_catalog.py` must exit 0 |
-| OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it |
+| OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it. Caveat: `--catalog` postdates the `v1.0.0` tag — drift recipe needs a `d5b2262`+ checkout (PROJECT.md Phase 1) |
 | CI | [.github/workflows/catalog-validate.yml](.github/workflows/catalog-validate.yml) | Validator + renderer smoke + version-bump enforcement on catalog PRs |
 | Release tag | `v1.0.0` (this repo) | Tags the Phase 0 close; consumers pin this exact tag |
 | License | [LICENSE](LICENSE) (MIT, code/docs) · [data/LICENSE](data/LICENSE) (CC0-1.0, data) | Decided 2026-09-05 |

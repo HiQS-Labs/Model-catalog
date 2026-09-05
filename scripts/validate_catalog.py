@@ -45,6 +45,10 @@ def main() -> int:
         return fail(f"version must be semver, got {catalog.get('version')!r}")
     if not DATE.match(str(catalog.get("updated", ""))):
         return fail(f"updated must be YYYY-MM-DD, got {catalog.get('updated')!r}")
+    try:
+        datetime.date.fromisoformat(str(catalog["updated"]))  # shape alone admits 2026-13-99
+    except ValueError:
+        return fail(f"updated {catalog.get('updated')!r} is not a real calendar date")
 
     rows = catalog.get("aliases")
     if not isinstance(rows, list) or not rows:

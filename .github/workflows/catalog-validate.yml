@@ -32,7 +32,13 @@ jobs:
           read -r head_version head_updated <<<"$(python3 -c 'import json; d=json.load(open("data/catalog.json")); print(d["version"], d["updated"])')"
           echo "base=$base_version/$base_updated head=$head_version/$head_updated"
           changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/catalog.json || true)"
-          if [ -n "$changed" ] && { [ "$base_version" = "$head_version" ] || [ "$base_updated" = "$head_updated" ]; }; then
-            echo "FAIL: data/catalog.json changed but version and/or updated were not both bumped (see PROJECT.md → Versioning)"
-            exit 1
+          if [ -n "$changed" ]; then
+            if [ "$base_version" = "none" ]; then
+              echo "FAIL: could not read the base catalog to compare versions (fail closed; see PROJECT.md → Versioning)"
+              exit 1
+            fi
+            if [ "$base_version" = "$head_version" ] || [ "$base_updated" = "$head_updated" ]; then
+              echo "FAIL: data/catalog.json changed but version and/or updated were not both bumped (see PROJECT.md → Versioning)"
+              exit 1
+            fi
           fi
