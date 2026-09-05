@@ -18,7 +18,14 @@ def squash(s: str) -> str:
 
 def main() -> int:
     root = Path(__file__).resolve().parent.parent
-    catalog = json.loads((root / "data" / "catalog.json").read_text())
+    catalog_path = root / "data" / "catalog.json"
+    argv = sys.argv[1:]
+    if "--catalog" in argv:
+        # Drift-check mode (XYZ #450): render from a vendored copy instead of this repo's data/.
+        catalog_path = Path(argv[argv.index("--catalog") + 1])
+    elif argv:
+        catalog_path = Path(argv[0])
+    catalog = json.loads(catalog_path.read_text())
     rows = [r for r in catalog["aliases"] if r["target"] == "openrouter"]
     rows.sort(key=lambda r: (-len(squash(r["match"])), r["match"]))
     lines = [

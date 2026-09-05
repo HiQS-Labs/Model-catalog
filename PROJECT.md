@@ -2,7 +2,7 @@
 gh_issue: 1
 source: https://github.com/HiQS-Labs/Model-catalog/issues/1
 title: "Model-catalog — one versioned alias/pin catalog feeding the XYZ-forge and AEGIS-Sleuth resolvers"
-status: Reviewed (2 relay rounds folded; Phases 1–2 ready to execute)
+status: Reviewed (3 relay rounds folded; Phases 1–2 ready to execute)
 created: 2026-09-05
 owner: noel
 doc_type: plan
@@ -100,7 +100,7 @@ Field contract:
 | `target` | yes | Which ID space `replace` lives in: `native` (provider-native) or `openrouter` (OpenRouter slug). Consumers filter on this; an `openrouter` row must never resolve for a native-ID consumer and vice versa. |
 | `provider` | yes | Owning provider of `replace` (openai, anthropic, google, deepseek, z-ai, nvidia, x-ai, qwen, stealth, …). |
 | `source` | yes | Where the pin came from (file + issue/PR). Every row must name its provenance. |
-| `verified_on` | no | Last date the pin was checked against a live catalog. Backfilled `2026-09-04` for the **31 rows whose `replace` is one of the six non-flagged Rev-4 pins** (six distinct first-party URLs, one per pinned ID); the flagged pin's rows (`gemini pro` / `gemini 2.5 pro` → `gemini-2.5-pro`) stay `null` per the flagged rule; the remaining **29 rows** (20 pre-GH-168 native + 7 XYZ openrouter) stay `null`. Rule: a dated row requires recorded per-ID evidence — a bulk pass qualifies only when each pinned ID carries its own source URL. (Coordination relay r3 S1 corrected this field's earlier "seven pins / 46 rows" arithmetic, which conflated pins with rows: v1.0.0 data = 31 dated / 29 null across 53 native + 7 openrouter.) A row flagged `unverified-generation` must have `verified_on: null` — a known-questionable pin claiming a verification date is false precision (relay QA r1); a row flagged `disputed` **keeps** its verify date, and the dispute date lives in the PR/commit history (relay QA r2 F11). |
+| `verified_on` | no | Last date the pin was checked against a live catalog. Backfilled `2026-09-04` for the **31 rows whose `replace` is one of the six non-flagged Rev-4 pins** (six distinct first-party URLs, one per pinned ID); the flagged pin's 2 rows stay `null` per the flagged rule; the remaining **29 null rows** = 20 pre-GH-168 native + those 2 flagged + 7 XYZ openrouter. Rule: a dated row requires recorded per-ID evidence — a bulk pass qualifies only when each pinned ID carries its own source URL. (Coordination relay r3 S1 corrected this field's earlier "seven pins / 46 rows" arithmetic, which conflated pins with rows: v1.0.0 data = 31 dated / 29 null across 53 native + 7 openrouter.) A row flagged `unverified-generation` must have `verified_on: null` — a known-questionable pin claiming a verification date is false precision (relay QA r1); a row flagged `disputed` **keeps** its verify date, and the dispute date lives in the PR/commit history (relay QA r2 F11). |
 | `flags` | no | Machine-readable caveats. v1 vocabulary: `unverified-generation` (carried but flagged for review, e.g. `gemini pro` → `gemini-2.5-pro`), `disputed` (two consumers disagree — see Governance; resolves per the row as it stands, contract item 6). |
 
 Schema rules (enforced by this repo's CI, `scripts/validate_catalog.py`): valid JSON per schema;
@@ -171,7 +171,10 @@ vendor-default-not-flagship deviation as data (a note in README), not silently.
    r2 F4): XYZ vendors `catalog.json` **byte-identical to the upstream tag** at
    `relay-automation/model-catalog/catalog.json` with a **pin record (tag + sha256)** beside it
    that CI verifies, closing the copy↔upstream edge no drift check can otherwise see; the drift
-   check re-renders the committed YAML from the committed copy and demands byte equality.
+   check re-renders the committed YAML from the committed copy
+   (`python3 scripts/render_openrouter.py --catalog relay-automation/model-catalog/catalog.json`)
+   (`python3 scripts/render_openrouter.py --catalog relay-automation/model-catalog/catalog.json`)
+   and demands byte equality.
 2. **Leave `resolve-model-alias.sh` untouched** (relay QA r1: a Bash shim parsing JSON invites
    fragile hand-rolled parsing and GH-551 adjacency; the compile-to-YAML shape keeps the resolver,
    its callers, and the vendored `.xyz/` lifecycle exactly as they are). The GH-346
@@ -184,6 +187,9 @@ vendor-default-not-flagship deviation as data (a note in README), not silently.
    guard lives in the resolver's test contract, not in data.
 4. `profile_resolve.py` / invocation telemetry records the catalog version (read from the vendored
    copy's `version` field).
+5. **Retire the hand-append flow** (coordination relay r3 S6): redirect relay-automation/README.md's
+   "Adding a new model alias" and the AGENTS.md GH-120 rail to the two-PR flow — once the YAML is
+   generated, a hand-appended line is exactly what the drift check turns CI-red.
 
 - Accept: green `validate.sh` on the PR; a stale-pin scenario (flip a row in the vendored copy) is
   caught by the CI drift check (render ≠ committed YAML), while the hand-written resolver
@@ -228,7 +234,7 @@ Semver on a data file, judged by what the change does to resolution:
 
 Rules: consumers pin **exact** versions (the two-PR governance already presumes it); every release
 is **git-tagged** so "resolved by catalog vX.Y.Z" names an immutable commit; catalog CI rejects a
-`data/catalog.json` change that does not bump `version` + `updated`; sync PRs are event-driven
+`data/catalog.json` change that does not bump both `version` and `updated`; sync PRs are event-driven
 (consumer needs a row; dispute adjudicated; MAJOR upgrade), plus a periodic `verified_on`-age audit
 on **both** consumer sides — XYZ's 7 rows otherwise sit `verified_on: null` forever with no
 freshness signal.
@@ -282,6 +288,16 @@ where exact IDs get refused — contract now states lookup-miss → pass-through
 Raw block: XYZ-forge `relay-system/2026-09-05/model-catalog-plan-qa-agy.md` (uncommitted — the shim's
 structural validator rejected the block's `**Verdict:**` formatting, exit 8, after the content was
 written; content reviewed and folded manually).
+
+### Relay r3 — coordination QA (DeepSeek harness / qwen3.8-max), 2026-09-05: FAIL → producer pass → re-review
+
+Two-round coordination review of COORDINATION.md + all linked artifacts. Round 1 `VERDICT: FAIL`
+with three verified blockers, all closed in `75e1913` (tag `v1.0.0` actually cut; CI actually wired —
+`catalog-validate` green on first run; renderer actually shipped + named in #450) plus S1–S3/N1–N2.
+Round 2 confirmed all closures (cold-start walk of #450 and #173 passes end-to-end) and swept a
+second tier — S4 null-breakdown arithmetic, S5 CI overclaim on `updated`, S6 hand-append-flow
+retirement, N3 duplicate-row tolerance, N4 drift-check recipe, N5 review-record staleness — folded
+in the same pass. Raw blocks: XYZ-forge `relay-system/2026-09-05/model-catalog-coordination-qa.md`.
 
 ### Relay r2 — DeepSeek harness / Alibaba Token Plan / qwen3.8-max, 2026-09-05: Changes requested (folded)
 

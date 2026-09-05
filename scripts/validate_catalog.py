@@ -77,12 +77,12 @@ def main() -> int:
 
         kw = (norm_ws(r["match"]), r["target"])
         if kw in seen_ws:
-            prev = seen_ws[kw]
-            if prev["replace"] != r["replace"]:
-                return fail(
-                    f"{where}: whole-phrase collision with row {prev['match']!r} "
-                    f"({prev['replace']!r} vs {r['replace']!r}) for target {r['target']!r}"
-                )
+            # Sleuth-side rule is "unique, full stop" (PROJECT.md): even an exact duplicate
+            # (same match, same replace) fails — dedupe is the editor's job, not CI's.
+            return fail(
+                f"{where}: whole-phrase collision with row {seen_ws[kw]['match']!r} "
+                f"for target {r['target']!r} (match keys must be unique per target)"
+            )
         else:
             seen_ws[kw] = r
         kp = (norm_punct(r["match"]), r["target"])

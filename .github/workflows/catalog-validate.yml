@@ -28,11 +28,11 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch --depth=1 origin "${{ github.base_ref }}"
-          base_version="$(git show "origin/${{ github.base_ref }}:data/catalog.json" 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])' 2>/dev/null || echo none)"
-          head_version="$(python3 -c 'import json; print(json.load(open("data/catalog.json"))["version"])')"
-          echo "base=$base_version head=$head_version"
+          read -r base_version base_updated <<<"$(git show "origin/${{ github.base_ref }}:data/catalog.json" 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["version"], d["updated"])' 2>/dev/null || echo none none)"
+          read -r head_version head_updated <<<"$(python3 -c 'import json; d=json.load(open("data/catalog.json")); print(d["version"], d["updated"])')"
+          echo "base=$base_version/$base_updated head=$head_version/$head_updated"
           changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/catalog.json || true)"
-          if [ -n "$changed" ] && [ "$base_version" = "$head_version" ]; then
-            echo "FAIL: data/catalog.json changed but version stayed $head_version (see PROJECT.md → Versioning)"
+          if [ -n "$changed" ] && { [ "$base_version" = "$head_version" ] || [ "$base_updated" = "$head_updated" ]; }; then
+            echo "FAIL: data/catalog.json changed but version and/or updated were not both bumped (see PROJECT.md → Versioning)"
             exit 1
           fi

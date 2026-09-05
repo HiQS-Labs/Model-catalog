@@ -14,7 +14,7 @@ and a repo disagree, the repo's own tracker wins — then fix this page.
 | Artifact | Where | State |
 |---|---|---|
 | Umbrella tracker (Phases 0–3) | [Model-catalog#1](https://github.com/HiQS-Labs/Model-catalog/issues/1) | Phase 0 ✅ · P1/P2 pending · P3 parked |
-| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — 2 relay rounds folded |
+| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — 3 relay rounds folded (r1 agy · r2/r3 qwen3.8-max) |
 | Catalog data v1.0.0 | [data/catalog.json](data/catalog.json) | 60 rows (53 native / 7 openrouter) |
 | Schema validator | [scripts/validate_catalog.py](scripts/validate_catalog.py) | Fuzz-hardened; `python3 scripts/validate_catalog.py` must exit 0 |
 | OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it |
