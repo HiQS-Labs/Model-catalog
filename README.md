@@ -81,6 +81,11 @@ Every release is git-tagged; consumers pin an **exact** version and record it wi
 Split licensing so the data feed stays friction-free for consumers while the tooling keeps its
 attribution.
 
+## Sample consumers
+
+Starter harnesses showing the contract in practice — Python, TypeScript, and Rust under
+[`examples/`](examples/README.md), each runnable in one command.
+
 ## Status
 
 Phase 0 (this catalog, v1.0.0) — merged from XYZ-forge's `openrouter-model-aliases.yml` (7 rows)
