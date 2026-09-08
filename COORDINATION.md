@@ -13,17 +13,24 @@ and a repo disagree, the repo's own tracker wins — then fix this page.
 
 | Artifact | Where | State |
 |---|---|---|
-| Umbrella tracker (Phases 0–3) | [Model-catalog#1](https://github.com/HiQS-Labs/Model-catalog/issues/1) | Phase 0 ✅ · P1/P2 pending · P3 parked |
-| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — plan QA ×2 + coordination ×4 relay cycles folded (r1 agy · r2–r4 qwen3.8-max) |
-| Catalog data v1.0.0 | [data/catalog.json](data/catalog.json) | 60 rows (53 native / 7 openrouter) |
-| Schema validator | [scripts/validate_catalog.py](scripts/validate_catalog.py) | Fuzz-hardened; `python3 scripts/validate_catalog.py` must exit 0 |
-| OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it. Caveat: `--catalog` postdates the `v1.0.0` tag — drift recipe needs a `d5b2262`+ checkout (PROJECT.md Phase 1) |
-| CI | [.github/workflows/catalog-validate.yml](.github/workflows/catalog-validate.yml) | Validator + renderer smoke + version-bump enforcement on catalog PRs |
-| Release tag | `v1.0.0` (this repo) | Tags the Phase 0 close; consumers pin this exact tag |
+| Artifact | Where | State |
+|---|---|---|
+| Umbrella tracker (Phases 0–3) | [Model-catalog#1](https://github.com/HiQS-Labs/Model-catalog/issues/1) | Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3 parked |
+| Authoritative plan | [PROJECT.md](PROJECT.md) (this repo) | Reviewed — plan QA ×2 + coordination ×4 relay cycles folded |
+| Catalog data v1.2.0 | [data/catalog.json](data/catalog.json) | 66 rows (57 native / 9 openrouter) — generated from `models.json` + `aliases.json` |
+| Catalog source entities | [data/models.json](data/models.json) | 21 canonical models with `status: "ga"\|"preview"\|"deprecated"` |
+| Alias declarations & variants | [data/aliases.json](data/aliases.json) | 64 declarations with deterministic variant rules |
+| Catalog generator | [scripts/generate_catalog.py](scripts/generate_catalog.py) | Compiles `models.json` + `aliases.json` $\rightarrow$ `catalog.json`; CI `--check` |
+| Schema validator | [scripts/validate_catalog.py](scripts/validate_catalog.py) | Uniqueness, dates, vocabulary, bare-word GA stability gate |
+| Provider verification probe | [scripts/verify_providers.py](scripts/verify_providers.py) | Scheduled probe measuring `verified_on` freshness and live OpenRouter status |
+| OpenRouter YAML renderer | [scripts/render_openrouter.py](scripts/render_openrouter.py) | Deterministic (squash-length desc, then lex); XYZ #450 consumes it |
+| CI | [.github/workflows/catalog-validate.yml](.github/workflows/catalog-validate.yml) | Generator sync + validator + renderer smoke + version-bump enforcement |
+| Scheduled CI | [.github/workflows/catalog-verify.yml](.github/workflows/catalog-verify.yml) | Weekly provider catalog drift probe (report-only) |
+| Release tags | `v1.0.0`, `v1.1.0`, `v1.2.0` | `v1.0.0` Phase 0; `v1.1.0` Hy4 preview; `v1.2.0` generator & bare-word GA gate |
 | License | [LICENSE](LICENSE) (MIT, code/docs) · [data/LICENSE](data/LICENSE) (CC0-1.0, data) | Decided 2026-09-05 |
-| **Phase 1 build-out (XYZ-forge)** | [XYZ-forge#450](https://github.com/HiQS-Labs/XYZ-forge/issues/450) | Pending — not started |
-| XYZ-forge parent context | [XYZ-forge#346](https://github.com/HiQS-Labs/XYZ-forge/issues/346) (+ [r2 findings comment](https://github.com/HiQS-Labs/XYZ-forge/issues/346#issuecomment-5553629381)) | Open |
-| **Phase 2 build-out (AEGIS-Sleuth)** | [AEGIS-Sleuth-Slackbot#173](https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot/issues/173) | Pending — not started |
+| **Phase 1 build-out (XYZ-forge)** | [XYZ-forge#450](https://github.com/HiQS-Labs/XYZ-forge/issues/450) → [PR #456](https://github.com/HiQS-Labs/XYZ-forge/pull/456) | ✅ Merged (`b282aa7c`) — live on `development` |
+| **Phase 2 build-out (AEGIS-Sleuth)** | [AEGIS-Sleuth#173](https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot/issues/173) → [PR #180](https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot/pull/180) | ✅ Merged & deployed to production (`4b192c76`) |
+| **Generator evolution & Tier 4 retirement** | [Model-catalog#3](https://github.com/HiQS-Labs/Model-catalog/issues/3) / [XYZ-forge#457](https://github.com/HiQS-Labs/XYZ-forge/issues/457) | Landed in `v1.2.0`: generator in CI, bare-word GA gate, Tier 4 retired |
 | Sleuth planning thread | [AEGIS-Sleuth-Slackbot#171](https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot/issues/171) (+ #168 resolver, closed completed) | Open |
 | Adjacent defect: dsh default-model | [XYZ-forge#448](https://github.com/HiQS-Labs/XYZ-forge/issues/448) → **[PR #449](https://github.com/HiQS-Labs/XYZ-forge/pull/449)** | PR open, CI green, awaiting review/merge |
 | Relay QA raw blocks | XYZ-forge `relay-system/2026-09-05/model-catalog-plan-qa-{agy,qwen}.md` (commit `a90c4df5`, local until next development push) | Committed |

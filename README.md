@@ -29,6 +29,7 @@ catalog, which is not this repo's concern.
 | `replace` | The pinned model ID. Never a default the resolver invents. |
 | `target` | Which ID space `replace` lives in: `native` (provider-native) or `openrouter` (OpenRouter slug). Consumers filter on this. |
 | `provider` | Owning provider of `replace`. |
+| `status` | Model stability status: `ga` (general availability), `preview`, or `deprecated`. |
 | `source` | Where the pin came from — file + issue/PR/URL. Every row names its provenance. |
 | `verified_on` | Last date the pin was checked against a live catalog. `null` = unverified, stated honestly. |
 | `flags` | Machine-readable caveats: `unverified-generation`, `disputed`. |
@@ -49,15 +50,21 @@ Known deviations carried as data (not silently): bare `gpt` is pinned to the ven
 model for a bare word, per the GH-168 operator decision; the `gemini pro` rows are flagged
 `unverified-generation`.
 
-## Changing the catalog
+## Authoring and changing the catalog
 
-1. PR a row here **with `version` + `updated` bumped in the same PR** (all fields, honest
-   `source`; verify against the provider's first-party model page and set `verified_on` when
-   real) — CI rejects a catalog PR that skips the bump.
-2. CI validates the schema rules (`scripts/validate_catalog.py`): uniqueness under both
-   consumers' normalizations, tier-4 capture, vocabulary limits, flagged rows carry no verify
-   date, calendar-date validity.
-3. A maintainer reviews and tags the release; each consumer then PRs its own pin-bump/sync. Two
+The source of truth is maintained in two structured files, and compiled into the distribution file `data/catalog.json`:
+- `data/models.json` — canonical model entities (provider, stability `status`, context window, and per-target IDs/sources).
+- `data/aliases.json` — alias phrases and deterministic variant generation rules (`spacing`, `vendor_prefix`).
+
+Workflow:
+1. Update `data/models.json` and/or `data/aliases.json`.
+2. Compile the catalog via `python3 scripts/generate_catalog.py` (which updates `data/catalog.json`).
+3. CI validates via `python3 scripts/generate_catalog.py --check` and `scripts/validate_catalog.py`:
+   uniqueness under both consumers' normalizations, bare-word GA stability (bare vendor aliases
+   must never resolve to `preview` models), vocabulary limits, valid dates, and version bump.
+4. Scheduled telemetry: `scripts/verify_providers.py` runs weekly via GitHub Actions to probe live
+   OpenRouter model endpoints and measure `verified_on` freshness.
+5. A maintainer reviews and tags the release; each consumer then PRs its own pin-bump/sync. Two
    PRs of friction is the deliberate price of pinned provenance — see PROJECT.md → Governance.
 
 ## Versioning

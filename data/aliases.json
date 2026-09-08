@@ -1,0 +1,328 @@
+[
+  {
+    "match": "anthropic",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "anthropic claude fable 5",
+    "model": "claude-fable-5",
+    "target": "native"
+  },
+  {
+    "match": "anthropic fable 5",
+    "model": "claude-fable-5",
+    "target": "native"
+  },
+  {
+    "match": "claude",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "claude fable 5",
+    "model": "claude-fable-5",
+    "target": "native"
+  },
+  {
+    "match": "claude haiku",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "claude haiku 4.5",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "claude opus",
+    "model": "claude-opus-5",
+    "target": "native"
+  },
+  {
+    "match": "claude opus 5",
+    "model": "claude-opus-5",
+    "target": "native"
+  },
+  {
+    "match": "claude sonnet",
+    "model": "claude-sonnet-5",
+    "target": "native"
+  },
+  {
+    "match": "claude sonnet 5",
+    "model": "claude-sonnet-5",
+    "target": "native"
+  },
+  {
+    "match": "fable 5",
+    "model": "claude-fable-5",
+    "target": "native"
+  },
+  {
+    "match": "fable5",
+    "model": "claude-fable-5",
+    "target": "native"
+  },
+  {
+    "match": "haiku",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "haiku 4.5",
+    "model": "claude-haiku-4-5-20251001",
+    "target": "native"
+  },
+  {
+    "match": "opus",
+    "model": "claude-opus-5",
+    "target": "native"
+  },
+  {
+    "match": "opus 5",
+    "model": "claude-opus-5",
+    "target": "native"
+  },
+  {
+    "match": "sonnet",
+    "model": "claude-sonnet-5",
+    "target": "native"
+  },
+  {
+    "match": "sonnet 5",
+    "model": "claude-sonnet-5",
+    "target": "native"
+  },
+  {
+    "match": "flash",
+    "model": "gemini-3.8-flash",
+    "target": "native"
+  },
+  {
+    "match": "gemini",
+    "model": "gemini-3.8-flash",
+    "target": "native"
+  },
+  {
+    "match": "gemini 2.5 pro",
+    "model": "gemini-2.5-pro",
+    "target": "native"
+  },
+  {
+    "match": "gemini 3.8 flash",
+    "model": "gemini-3.8-flash",
+    "target": "native"
+  },
+  {
+    "match": "gemini flash",
+    "model": "gemini-3.8-flash",
+    "target": "native"
+  },
+  {
+    "match": "gemini pro",
+    "model": "gemini-2.5-pro",
+    "target": "native"
+  },
+  {
+    "match": "google",
+    "model": "gemini-3.8-flash",
+    "target": "native"
+  },
+  {
+    "match": "astra",
+    "model": "gpt-6-astra",
+    "target": "native"
+  },
+  {
+    "match": "chat gpt",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 4o",
+    "model": "gpt-4o",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 4o mini",
+    "model": "gpt-4o-mini",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 5",
+    "model": "gpt-5",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 5 mini",
+    "model": "gpt-5-mini",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 5.5",
+    "model": "gpt-5.5",
+    "target": "native"
+  },
+  {
+    "match": "chatgpt 5.6 terra",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "gpt",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "gpt 4o",
+    "model": "gpt-4o",
+    "target": "native"
+  },
+  {
+    "match": "gpt 4o mini",
+    "model": "gpt-4o-mini",
+    "target": "native"
+  },
+  {
+    "match": "gpt 5",
+    "model": "gpt-5",
+    "target": "native"
+  },
+  {
+    "match": "gpt 5 mini",
+    "model": "gpt-5-mini",
+    "target": "native"
+  },
+  {
+    "match": "gpt 5.5",
+    "model": "gpt-5.5",
+    "target": "native"
+  },
+  {
+    "match": "gpt 5.6 terra",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "gpt 6",
+    "model": "gpt-6-astra",
+    "target": "native"
+  },
+  {
+    "match": "gpt 6 astra",
+    "model": "gpt-6-astra",
+    "target": "native"
+  },
+  {
+    "match": "gpt4o",
+    "model": "gpt-4o",
+    "target": "native"
+  },
+  {
+    "match": "gpt4o mini",
+    "model": "gpt-4o-mini",
+    "target": "native"
+  },
+  {
+    "match": "gpt5",
+    "model": "gpt-5",
+    "target": "native"
+  },
+  {
+    "match": "gpt5 mini",
+    "model": "gpt-5-mini",
+    "target": "native"
+  },
+  {
+    "match": "gpt5.5",
+    "model": "gpt-5.5",
+    "target": "native"
+  },
+  {
+    "match": "gpt6",
+    "model": "gpt-6-astra",
+    "target": "native"
+  },
+  {
+    "match": "open ai",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "openai",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "terra",
+    "model": "gpt-5.6-terra",
+    "target": "native"
+  },
+  {
+    "match": "deepseek v4 pro",
+    "model": "deepseek-v4-pro",
+    "target": "openrouter"
+  },
+  {
+    "match": "nemotron ultra 3",
+    "model": "nemotron-3-ultra-550b-a55b",
+    "target": "openrouter"
+  },
+  {
+    "match": "nemotron ultra 3 free",
+    "model": "nemotron-3-ultra-550b-a55b:free",
+    "target": "openrouter"
+  },
+  {
+    "match": "qwen3 coder",
+    "model": "qwen3-coder",
+    "target": "openrouter"
+  },
+  {
+    "match": "stealth ox-alpha",
+    "model": "ox-alpha",
+    "target": "openrouter"
+  },
+  {
+    "match": "grok 4.6",
+    "model": "grok-4.6",
+    "target": "openrouter"
+  },
+  {
+    "match": "glm-5.2",
+    "model": "glm-5.2",
+    "target": "openrouter"
+  },
+  {
+    "match": "hy4",
+    "model": "hy4-preview",
+    "targets": [
+      "native",
+      "openrouter"
+    ]
+  },
+  {
+    "match": "hy 4",
+    "model": "hy4-preview",
+    "target": "native"
+  },
+  {
+    "match": "hy4 preview",
+    "model": "hy4-preview",
+    "targets": [
+      "native",
+      "openrouter"
+    ]
+  },
+  {
+    "match": "tencent hy4",
+    "model": "hy4-preview",
+    "target": "native"
+  }
+]

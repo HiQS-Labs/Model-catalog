@@ -220,6 +220,22 @@ routing) reopens this. If it ever does: server-side, thin, in front of a proven 
 Portkey) rather than from scratch, with its own reversibility read. This repo's data remains the
 source of truth either way.
 
+### Phase 4 — generator-driven catalog & bare-word stability (Issue #3, v1.2.0)
+
+Motivated by friction observed in PR #2 / Issue #4 (transcription duplication, house-style guesswork,
+bare-word convention vs tier-4 substring collision). Preserves byte-compatible reader contract:
+1. **`data/models.json` + `data/aliases.json`:** Source of truth authoring separated into canonical
+   model entities (provider, stability `status: "ga"|"preview"|"deprecated"`, context window, target IDs)
+   and alias rules (canonical phrases + deterministic variant generation).
+2. **Deterministic compiler (`scripts/generate_catalog.py`):** Emits `data/catalog.json`; CI `--check`
+   enforces that committed catalog matches source entities.
+3. **Bare-word GA stability gate:** `scripts/validate_catalog.py` mechanically rejects any bare vendor
+   alias mapping to a `preview` model (enforcing the operator policy in code).
+4. **Tier-4 substring retirement:** XYZ-forge retired its substring fallback tier (Rule 1 compliance);
+   obsolete Tier-4 capture check deleted from `validate_catalog.py`.
+5. **Scheduled verification probe:** `scripts/verify_providers.py` runs weekly in GitHub Actions,
+   measuring `verified_on` freshness and probing live OpenRouter endpoints (report-only).
+
 ## Versioning & cadence (relay QA r2 F5 — the taxonomy the doc previously presumed)
 
 Semver on a data file, judged by what the change does to resolution:

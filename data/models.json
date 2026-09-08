@@ -1,0 +1,263 @@
+{
+  "claude-haiku-4-5-20251001": {
+    "provider": "anthropic",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "claude-haiku-4-5-20251001",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://platform.claude.com/docs/en/models/haiku-4-5/overview",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "claude-fable-5": {
+    "provider": "anthropic",
+    "status": "deprecated",
+    "targets": {
+      "native": {
+        "id": "claude-fable-5",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "claude-opus-5": {
+    "provider": "anthropic",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "claude-opus-5",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://platform.claude.com/docs/en/models/opus-5/overview",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "claude-sonnet-5": {
+    "provider": "anthropic",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "claude-sonnet-5",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://platform.claude.com/docs/en/models/sonnet-5/overview",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "gemini-3.8-flash": {
+    "provider": "gemini",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gemini-3.8-flash",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://ai.google.dev/gemini-api/docs/models",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "gemini-2.5-pro": {
+    "provider": "gemini",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gemini-2.5-pro",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://ai.google.dev/gemini-api/docs/models",
+        "verified_on": null,
+        "flags": [
+          "unverified-generation"
+        ]
+      }
+    }
+  },
+  "gpt-6-astra": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-6-astra",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://platform.openai.com/docs/models/gpt-6-astra",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "gpt-5.6-terra": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-5.6-terra",
+        "source": "AEGIS-Sleuth GH-168 rev4 operator pins, verified https://platform.openai.com/docs/models/gpt-5.6-terra",
+        "verified_on": "2026-09-04",
+        "flags": []
+      }
+    }
+  },
+  "gpt-4o": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-4o",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "gpt-4o-mini": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-4o-mini",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "gpt-5": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-5",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "gpt-5-mini": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-5-mini",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "gpt-5.5": {
+    "provider": "openai",
+    "status": "ga",
+    "targets": {
+      "native": {
+        "id": "gpt-5.5",
+        "source": "AEGIS-Sleuth data/static/ai/command-normalization.json (pre-GH-168 alias rows)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "deepseek-v4-pro": {
+    "provider": "deepseek",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "deepseek/deepseek-v4-pro",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "nemotron-3-ultra-550b-a55b": {
+    "provider": "nvidia",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "nvidia/nemotron-3-ultra-550b-a55b",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "nemotron-3-ultra-550b-a55b:free": {
+    "provider": "nvidia",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "qwen3-coder": {
+    "provider": "qwen",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "qwen/qwen3-coder",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "ox-alpha": {
+    "provider": "stealth",
+    "status": "preview",
+    "targets": {
+      "openrouter": {
+        "id": "stealth/ox-alpha",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "grok-4.6": {
+    "provider": "x-ai",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "x-ai/grok-4.6",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "glm-5.2": {
+    "provider": "z-ai",
+    "status": "ga",
+    "targets": {
+      "openrouter": {
+        "id": "z-ai/glm-5.2",
+        "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
+        "verified_on": null,
+        "flags": []
+      }
+    }
+  },
+  "hy4-preview": {
+    "provider": "tencent",
+    "status": "preview",
+    "targets": {
+      "native": {
+        "id": "hy4-preview",
+        "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+        "verified_on": "2026-09-08",
+        "flags": []
+      },
+      "openrouter": {
+        "id": "tencent/hy4-preview",
+        "source": "OpenRouter live /api/v1/models check (tencent/hy4-preview, 1048576 ctx); release https://github.com/Tencent-Hunyuan/Hy4-preview",
+        "verified_on": "2026-09-08",
+        "flags": []
+      }
+    },
+    "context_window": 1048576
+  }
+}
