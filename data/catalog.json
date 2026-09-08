@@ -1,7 +1,7 @@
 {
   "schema": "hiqs.model-catalog/1",
-  "version": "1.0.0",
-  "updated": "2026-09-05",
+  "version": "1.1.0",
+  "updated": "2026-09-08",
   "sources": [
     "https://github.com/HiQS-Labs/XYZ-forge (relay-automation/openrouter-model-aliases.yml, GH-120)",
     "https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot (data/static/ai/command-normalization.json, GH-168)"
@@ -549,6 +549,60 @@
       "provider": "z-ai",
       "source": "XYZ-forge relay-automation/openrouter-model-aliases.yml (GH-120)",
       "verified_on": null,
+      "flags": []
+    },
+    {
+      "match": "hy4",
+      "replace": "hy4-preview",
+      "target": "native",
+      "provider": "tencent",
+      "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "hy 4",
+      "replace": "hy4-preview",
+      "target": "native",
+      "provider": "tencent",
+      "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "hy4 preview",
+      "replace": "hy4-preview",
+      "target": "native",
+      "provider": "tencent",
+      "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "tencent hy4",
+      "replace": "hy4-preview",
+      "target": "native",
+      "provider": "tencent",
+      "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "hy4",
+      "replace": "tencent/hy4-preview",
+      "target": "openrouter",
+      "provider": "tencent",
+      "source": "OpenRouter live /api/v1/models check (tencent/hy4-preview, 1048576 ctx); release https://github.com/Tencent-Hunyuan/Hy4-preview",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "hy4 preview",
+      "replace": "tencent/hy4-preview",
+      "target": "openrouter",
+      "provider": "tencent",
+      "source": "OpenRouter live /api/v1/models check (tencent/hy4-preview, 1048576 ctx); release https://github.com/Tencent-Hunyuan/Hy4-preview",
+      "verified_on": "2026-09-08",
       "flags": []
     }
   ]
