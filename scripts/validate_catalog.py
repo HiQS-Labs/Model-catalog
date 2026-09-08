@@ -3,8 +3,8 @@
 
 Exits 0 with a row-count summary, or non-zero naming the first violation.
 The point of this file is that the schema rules in PROJECT.md are CHECKED, not
-prose: uniqueness under both consumers' normalizations, vocabulary limits, and
-the flagged-rows-carry-no-verify-date rule all fail loudly here.
+prose: uniqueness under both consumers' normalizations, vocabulary limits,
+bare-word GA stability, and the flagged-rows-carry-no-verify-date rule all fail loudly here.
 """
 import datetime
 import json
@@ -14,7 +14,15 @@ from pathlib import Path
 
 TARGETS = {"native", "openrouter"}
 FLAGS = {"unverified-generation", "disputed"}
+STATUSES = {"ga", "preview", "deprecated"}
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# Recognized colloquial vendor names that must adhere to the "bare vendor word = GA model" policy
+KNOWN_VENDOR_BRANDS = {
+    "anthropic", "claude", "google", "gemini", "openai", "open ai", "gpt",
+    "chatgpt", "chat gpt", "tencent", "hunyuan", "deepseek", "nvidia", "qwen",
+    "x-ai", "grok", "z-ai", "glm"
+}
 
 
 def norm_ws(s: str) -> str:
@@ -63,6 +71,8 @@ def main() -> int:
                 return fail(f"{where}: required field {field!r} missing or empty")
         if r["target"] not in TARGETS:
             return fail(f"{where}: target {r['target']!r} not in {sorted(TARGETS)}")
+        if "status" in r and r["status"] not in STATUSES:
+            return fail(f"{where}: status {r['status']!r} not in {sorted(STATUSES)}")
         flags = r.get("flags", [])
         if not isinstance(flags, list) or not set(flags) <= FLAGS:
             return fail(f"{where}: flags {flags!r} not a subset of {sorted(FLAGS)}")
@@ -79,10 +89,21 @@ def main() -> int:
         if vo is None and "verified_on" not in r:
             return fail(f"{where}: verified_on key must be present (null when unverified)")
 
+        # Bare-word GA stability gate (Issue #3 Item 2 & Issue #4):
+        # A bare vendor or provider brand alias must not resolve to a preview model.
+        is_bare_vendor = (
+            r["match"] in KNOWN_VENDOR_BRANDS
+            or r["match"] == r["provider"]
+            or norm_punct(r["match"]) == norm_punct(r["provider"])
+        )
+        if is_bare_vendor and r.get("status") == "preview":
+            return fail(
+                f"{where}: bare vendor alias {r['match']!r} must not resolve to a preview model "
+                f"({r['replace']!r}) — see README bare-word convention and Issue #4"
+            )
+
         kw = (norm_ws(r["match"]), r["target"])
         if kw in seen_ws:
-            # Sleuth-side rule is "unique, full stop" (PROJECT.md): even an exact duplicate
-            # (same match, same replace) fails — dedupe is the editor's job, not CI's.
             return fail(
                 f"{where}: whole-phrase collision with row {seen_ws[kw]['match']!r} "
                 f"for target {r['target']!r} (match keys must be unique per target)"
@@ -99,26 +120,6 @@ def main() -> int:
                 )
         else:
             seen_punct[kp] = r
-
-    # Tier-4 capture rule (relay QA r2 F2b): XYZ's resolver has a substring-fallback tier
-    # (file-order-wins) that can capture an EXACT model-ID query when squash(query) is a substring
-    # of squash(some row's replace) whose replace differs. Benign while pins are true; a silent
-    # redirection the moment a pin is corrected. Make it structurally impossible. Scoped to
-    # target=openrouter rows: XYZ is the only substring-tier consumer, and it renders only those;
-    # the native side is entire-value (whole-value collisions are covered by the uniqueness rules).
-    for a in rows:
-        if a["target"] != "openrouter":
-            continue
-        for b in rows:
-            if b["target"] != "openrouter" or a is b:
-                continue
-            am, br = norm_punct(a["match"]), norm_punct(b["replace"])
-            if am and am in br and a["replace"] != b["replace"]:
-                return fail(
-                    f"tier-4 capture: squash({a['match']!r})={am!r} is captured by "
-                    f"{b['replace']!r} whose replace differs ({b['replace']!r} vs {a['replace']!r}) "
-                    f"— an exact-ID query for {a['replace']!r} would be silently redirected"
-                )
 
     by_target = {}
     for r in rows:

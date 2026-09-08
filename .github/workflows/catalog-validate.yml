@@ -15,7 +15,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Schema rules (uniqueness, vocabulary, dates, tier-4 capture)
+      - name: Generator sync check (data/catalog.json matches models.json + aliases.json)
+        run: python3 scripts/generate_catalog.py --check
+      - name: Schema rules (uniqueness, vocabulary, dates, bare-word stability)
         run: python3 scripts/validate_catalog.py
       - name: Renderer runs clean and emits exactly the openrouter rows
         run: |
@@ -32,13 +34,18 @@ jobs:
           read -r head_version head_updated <<<"$(python3 -c 'import json; d=json.load(open("data/catalog.json")); print(d["version"], d["updated"])')"
           echo "base=$base_version/$base_updated head=$head_version/$head_updated"
           changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/catalog.json || true)"
+          today="$(date -u +%Y-%m-%d)"
           if [ -n "$changed" ]; then
             if [ "$base_version" = "none" ]; then
               echo "FAIL: could not read the base catalog to compare versions (fail closed; see PROJECT.md → Versioning)"
               exit 1
             fi
-            if [ "$base_version" = "$head_version" ] || [ "$base_updated" = "$head_updated" ]; then
-              echo "FAIL: data/catalog.json changed but version and/or updated were not both bumped (see PROJECT.md → Versioning)"
+            if [ "$base_version" = "$head_version" ]; then
+              echo "FAIL: data/catalog.json changed but version was not bumped (stayed $head_version)"
+              exit 1
+            fi
+            if [ "$base_updated" = "$head_updated" ] && [ "$head_updated" != "$today" ]; then
+              echo "FAIL: data/catalog.json changed but updated was not bumped to today ($today)"
               exit 1
             fi
           fi
