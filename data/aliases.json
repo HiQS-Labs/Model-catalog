@@ -324,5 +324,55 @@
     "match": "tencent hy4",
     "model": "hy4-preview",
     "target": "native"
+  },
+  {
+    "match": "meta",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "muse",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "spark",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "muse spark",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "meta muse",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "muse spark 1.3",
+    "model": "muse-spark-1.3",
+    "target": "native"
+  },
+  {
+    "match": "muse contributor",
+    "model": "muse-spark-1.3-contributor",
+    "target": "native"
+  },
+  {
+    "match": "spark contributor",
+    "model": "muse-spark-1.3-contributor",
+    "target": "native"
+  },
+  {
+    "match": "muse spark contributor",
+    "model": "muse-spark-1.3-contributor",
+    "target": "native"
+  },
+  {
+    "match": "muse spark 1.3 contributor",
+    "model": "muse-spark-1.3-contributor",
+    "target": "native"
   }
 ]
