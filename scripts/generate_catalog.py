@@ -41,7 +41,7 @@ def build_catalog(models_path: Path, aliases_path: Path, base_catalog_path: Path
     base_catalog = json.loads(base_catalog_path.read_text()) if base_catalog_path.exists() else {}
 
     schema = base_catalog.get("schema", "hiqs.model-catalog/1")
-    version = "1.2.0"
+    version = "1.3.0"
     updated = base_catalog.get("updated", "2026-09-08")
     sources = base_catalog.get("sources", [])
 

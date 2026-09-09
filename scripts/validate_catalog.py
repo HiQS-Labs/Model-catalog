@@ -21,7 +21,7 @@ DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 KNOWN_VENDOR_BRANDS = {
     "anthropic", "claude", "google", "gemini", "openai", "open ai", "gpt",
     "chatgpt", "chat gpt", "tencent", "hunyuan", "deepseek", "nvidia", "qwen",
-    "x-ai", "grok", "z-ai", "glm"
+    "x-ai", "grok", "z-ai", "glm", "meta", "muse", "spark"
 }
 
 

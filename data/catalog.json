@@ -1,7 +1,7 @@
 {
   "schema": "hiqs.model-catalog/1",
-  "version": "1.2.0",
-  "updated": "2026-09-08",
+  "version": "1.3.0",
+  "updated": "2026-09-09",
   "sources": [
     "https://github.com/HiQS-Labs/XYZ-forge (relay-automation/openrouter-model-aliases.yml, GH-120)",
     "https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot (data/static/ai/command-normalization.json, GH-168)"
@@ -668,6 +668,106 @@
       "provider": "tencent",
       "status": "preview",
       "source": "Tencent Cloud TokenHub model list https://www.tencentcloud.com/document/product/1300/80632 (model parameter 'hy4-preview')",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "meta",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "spark",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse spark",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "meta muse",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse spark 1.3",
+      "replace": "muse-spark-1.3",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3` run. Clause-free tier: $1.25/$4.25/$0.15 per M in/out/cached.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse contributor",
+      "replace": "muse-spark-1.3-contributor",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (is_current true, is_default true, visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3-contributor` run. Discounted tier at $0.10/$0.20/$0.002 per M; Meta states content including inter-session messages may be used for product improvement.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "spark contributor",
+      "replace": "muse-spark-1.3-contributor",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (is_current true, is_default true, visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3-contributor` run. Discounted tier at $0.10/$0.20/$0.002 per M; Meta states content including inter-session messages may be used for product improvement.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse spark contributor",
+      "replace": "muse-spark-1.3-contributor",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (is_current true, is_default true, visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3-contributor` run. Discounted tier at $0.10/$0.20/$0.002 per M; Meta states content including inter-session messages may be used for product improvement.",
+      "verified_on": "2026-09-08",
+      "flags": []
+    },
+    {
+      "match": "muse spark 1.3 contributor",
+      "replace": "muse-spark-1.3-contributor",
+      "target": "native",
+      "provider": "meta",
+      "status": "ga",
+      "source": "Meta provider catalog as served to Muse Code 1.0.3 (is_current true, is_default true, visibility 'visible', released 2026-09-02); id confirmed by a live `muse exec --model muse-spark-1.3-contributor` run. Discounted tier at $0.10/$0.20/$0.002 per M; Meta states content including inter-session messages may be used for product improvement.",
       "verified_on": "2026-09-08",
       "flags": []
     }
