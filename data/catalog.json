@@ -1,7 +1,7 @@
 {
   "schema": "hiqs.model-catalog/1",
   "version": "1.3.0",
-  "updated": "2026-09-08",
+  "updated": "2026-09-09",
   "sources": [
     "https://github.com/HiQS-Labs/XYZ-forge (relay-automation/openrouter-model-aliases.yml, GH-120)",
     "https://github.com/HiQS-Labs/AEGIS-Sleuth-Slackbot (data/static/ai/command-normalization.json, GH-168)"
