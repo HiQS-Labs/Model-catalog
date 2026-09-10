@@ -9,6 +9,8 @@ Consumed today (or planned) by:
 - **XYZ-forge** — `resolve-model-alias.sh` / `resolve-profile.sh` (GH-346 Phase 3a) via the
   `target: "openrouter"` rows.
 - **AEGIS-Sleuth-Slackbot** — the GH-168 model alias resolver via the `target: "native"` rows.
+- **Local runtime tooling** — portable Ollama / MLX registrations from the separate
+  [`data/local-models.json`](data/local-models.json) feed.
 
 Canonical plan: [PROJECT.md](PROJECT.md) · canonical issue: [#1](https://github.com/HiQS-Labs/Model-catalog/issues/1).
 
@@ -44,6 +46,23 @@ catalog, which is not this repo's concern.
 5. Exact model IDs are never declared keys, so they always pass through untouched.
 6. **Flagged rows resolve normally.** `flags` are advisory metadata (logged, surfaced in
    diagnostics), never a refusal reason — both consumers must behave identically on flagged rows.
+
+### Local model registrations
+
+Local models live in [`data/local-models.json`](data/local-models.json), a separate
+`hiqs.local-model-catalog/1` feed. Keeping it separate is a compatibility boundary: existing v1
+alias consumers deserialize a closed `native | openrouter` target vocabulary, so inserting a new
+target into `data/catalog.json` would break them before target filtering occurs.
+
+Each local registration records stable aliases, the runtime-facing model ID, engine, format,
+quantization, upstream repository/file, pinned revision, SHA-256, byte size, context window,
+provenance, and verification date. It deliberately excludes machine-specific paths, endpoints,
+credentials, and mutable runtime state. Validate both feeds with:
+
+```bash
+python3 scripts/validate_catalog.py
+python3 scripts/validate_local_models.py
+```
 
 Known deviations carried as data (not silently): bare `gpt` is pinned to the vendor default
 `gpt-5.6-terra`, not the flagship `gpt-6-astra` (which has its own explicit rows) — the everyday
