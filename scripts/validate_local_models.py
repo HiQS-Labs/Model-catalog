@@ -22,6 +22,7 @@ REVISION = re.compile(r"^[0-9a-f]{40}$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 OLLAMA_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)?(?::[A-Za-z0-9][A-Za-z0-9._-]*)?$")
+ARTIFACT_COMPONENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def fail(message: str) -> int:
@@ -58,9 +59,8 @@ def unexpected_fields(value: dict, allowed: set[str]) -> list[str]:
 
 def portable_file(value: str) -> bool:
     path = PurePosixPath(value)
-    return (bool(value) and not any(char in value for char in "\\%?#")
-            and not path.is_absolute() and value == path.as_posix()
-            and ".." not in path.parts and "." not in path.parts)
+    return (bool(path.parts) and not path.is_absolute() and value == path.as_posix()
+            and all(ARTIFACT_COMPONENT.fullmatch(part) for part in path.parts))
 
 
 def repository_id(value: str) -> bool:
