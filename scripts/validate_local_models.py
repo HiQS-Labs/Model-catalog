@@ -61,6 +61,10 @@ def portable_file(value: str) -> bool:
     return bool(value) and "\\" not in value and not path.is_absolute() and value == path.as_posix() and ".." not in path.parts and "." not in path.parts
 
 
+def repository_id(value: str) -> bool:
+    return bool(REPOSITORY.fullmatch(value)) and all(part not in {".", ".."} for part in value.split("/"))
+
+
 def main() -> int:
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data" / "local-models.json"
     try:
@@ -133,7 +137,7 @@ def main() -> int:
             return fail(f"{where}: unsupported quantization {runtime['quantization']!r} for {pair!r}")
         if runtime["engine"] == "ollama" and not OLLAMA_ID.fullmatch(runtime["model_id"]):
             return fail(f"{where}: runtime.model_id must be a portable Ollama model name")
-        if runtime["engine"] == "mlx" and not REPOSITORY.fullmatch(runtime["model_id"]):
+        if runtime["engine"] == "mlx" and not repository_id(runtime["model_id"]):
             return fail(f"{where}: runtime.model_id must be a portable MLX owner/repository ID")
         runtime_key = (runtime["engine"], runtime["model_id"])
         if runtime_key in runtime_ids:
@@ -149,7 +153,7 @@ def main() -> int:
         for field in ("repository", "file", "url", "revision", "sha256"):
             if not isinstance(artifact.get(field), str) or not artifact[field].strip():
                 return fail(f"{where}: artifact.{field} missing or empty")
-        if not REPOSITORY.fullmatch(artifact["repository"]):
+        if not repository_id(artifact["repository"]):
             return fail(f"{where}: artifact.repository must be owner/repository")
         if not portable_file(artifact["file"]):
             return fail(f"{where}: artifact.file must be a portable relative path without traversal")

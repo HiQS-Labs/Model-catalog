@@ -56,6 +56,11 @@ class LocalCatalogTests(unittest.TestCase):
             ("runtime endpoint", lambda d: d["models"][0]["runtime"].__setitem__("model_id", "http://localhost/model"), "portable Ollama"),
             ("mutable URL", lambda d: d["models"][0]["artifact"].__setitem__("url", d["models"][0]["artifact"]["url"].replace(d["models"][0]["artifact"]["revision"], "main")), "pinned"),
             ("blob URL", lambda d: d["models"][0]["artifact"].__setitem__("url", d["models"][0]["artifact"]["url"].replace("/resolve/", "/blob/")), "pinned"),
+            ("fragment URL", lambda d: d["models"][0]["artifact"].__setitem__("url", d["models"][0]["artifact"]["url"] + "#/" + d["models"][0]["artifact"]["revision"] + "/" + d["models"][0]["artifact"]["file"]), "pinned"),
+            ("MLX traversal", lambda d: d["models"][1]["runtime"].__setitem__("model_id", "../model"), "portable MLX"),
+            ("MLX dot owner", lambda d: d["models"][1]["runtime"].__setitem__("model_id", "./model"), "portable MLX"),
+            ("MLX dot repo", lambda d: d["models"][1]["runtime"].__setitem__("model_id", "owner/.."), "portable MLX"),
+            ("artifact traversal repo", lambda d: d["models"][0]["artifact"].__setitem__("repository", "../model"), "owner/repository"),
             ("status object", lambda d: d["models"][0].__setitem__("status", []), "invalid status"),
             ("root machine field", lambda d: d.__setitem__("endpoint", "http://localhost"), "unsupported fields"),
             ("model machine field", lambda d: d["models"][0].__setitem__("local_path", "/tmp/x"), "unsupported fields"),
@@ -113,6 +118,11 @@ class LocalCatalogTests(unittest.TestCase):
                 result = self.validate(broken)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(expected, result.stdout)
+
+    def test_valid_owner_repository_identifier_is_accepted(self):
+        valid = copy.deepcopy(self.local)
+        valid["models"][1]["runtime"]["model_id"] = "owner-name/repo.name_2"
+        self.assertEqual(self.validate(valid).returncode, 0)
 
 
 if __name__ == "__main__":

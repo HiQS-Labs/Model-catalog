@@ -1,6 +1,6 @@
 # Sample consumers
 
-Three minimal reference harnesses — same semantics, three languages. Each is a
+Three minimal reference harnesses — same semantics for the catalog's ASCII alias vocabulary, three languages. Each is a
 **starter to copy into your project**, not a library to depend on: vendor
 `data/catalog.json` at a pinned tag and point the loader at YOUR copy.
 
