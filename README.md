@@ -43,7 +43,8 @@ catalog, which is not this repo's concern.
    terminal state (unresolved **and** invalid), never a default.
 3. No network at resolution time.
 4. Record which catalog version resolved a turn (provenance).
-5. Exact model IDs are never declared keys, so they always pass through untouched.
+5. Exact model IDs are collected from each target's `replace` values and checked before alias
+   normalization, so they always pass through untouched even if an ID normalizes to an alias.
 6. **Flagged rows resolve normally.** `flags` are advisory metadata (logged, surfaced in
    diagnostics), never a refusal reason — both consumers must behave identically on flagged rows.
 
@@ -55,7 +56,8 @@ alias consumers deserialize a closed `native | openrouter` target vocabulary, so
 target into `data/catalog.json` would break them before target filtering occurs.
 
 Each local registration records stable aliases, the runtime-facing model ID, engine, format,
-quantization, upstream repository/file, pinned revision, SHA-256, byte size, context window,
+quantization, upstream repository/file, revision-specific download URL, pinned revision, SHA-256,
+byte size, advertised model context window, optional tested context window,
 provenance, and verification date. It deliberately excludes machine-specific paths, endpoints,
 credentials, and mutable runtime state. Validate both feeds with:
 
@@ -91,6 +93,13 @@ Local registrations are authored directly in `data/local-models.json`; they are 
 and artifact hash, then run `python3 scripts/validate_local_models.py` and
 `python3 -m unittest discover -s tests -v`. Do not add local rows to `data/catalog.json`.
 
+For Ollama, download the catalog's revision-specific GGUF URL, verify its SHA-256 and byte size,
+then create the cataloged `runtime.model_id` with a `Modelfile` whose `FROM` points to that verified
+file. For MLX, download the **entire repository snapshot at `artifact.revision`** (configuration,
+tokenizer, and weights), then verify the cataloged weight file; the single-file hash is not a claim
+that the rest of a mutable repository is pinned. `model_context_window` is upstream capability,
+while `tested_context_window` records only a context size actually exercised by the cited work.
+
 ## Versioning
 
 Semver on a data file, judged by what the change does to resolution:
@@ -109,7 +118,8 @@ Every release is git-tagged; consumers pin an **exact** version and record it wi
 - **MINOR** — registration, alias, runtime, or artifact change.
 - **PATCH** — provenance-only metadata change.
 
-Any local-catalog content change must bump its `version` and set `updated` to the change date. The
+Any local-catalog content change must monotonically increase its `version` and advance `updated` to
+the change date (never later than the CI date). The
 repository release tag covers both feeds; local consumers record the local feed's own version.
 
 ## License

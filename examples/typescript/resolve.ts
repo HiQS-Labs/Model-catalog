@@ -63,6 +63,7 @@ export function loadCatalog(p: string): Catalog {
 
 export class Resolver {
   readonly version: string;
+  readonly #exactIds: Set<string>;
   readonly #byPhrase: Map<string, CatalogRow>;
   readonly #bySquash: Map<string, CatalogRow>;
 
@@ -71,10 +72,12 @@ export class Resolver {
       throw new Error(`target must be native|openrouter, got ${target}`);
     }
     this.version = catalog.version;
+    this.#exactIds = new Set();
     this.#byPhrase = new Map();
     this.#bySquash = new Map();
     for (const row of catalog.aliases) {
       if (row.target !== target) continue;
+      this.#exactIds.add(row.replace);
       this.#byPhrase.set(phrase(row.match), row);
       this.#bySquash.set(squash(row.match), row);
     }
@@ -83,6 +86,7 @@ export class Resolver {
   resolve(query: string): Resolution {
     const base: Resolution = { query, resolved: false, flags: [], catalogVersion: this.version };
     if (!query.trim()) return base;
+    if (this.#exactIds.has(query)) return base;
     for (const [matchedOn, key, table] of [
       ["phrase", phrase(query), this.#byPhrase],
       ["squash", squash(query), this.#bySquash],

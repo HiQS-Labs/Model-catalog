@@ -4,14 +4,23 @@ import datetime
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
-ENGINES = {"mlx", "ollama"}
-FORMATS = {"gguf", "mlx"}
 STATUSES = {"ga", "preview", "deprecated"}
+RUNTIME_CONTRACTS = {
+    ("ollama", "gguf"): {"Q4_K_M", "Q8_0", "F16"},
+    ("mlx", "mlx"): {"4bit", "8bit", "bf16"},
+}
+ROOT_FIELDS = {"schema", "version", "updated", "models"}
+MODEL_FIELDS = {"key", "display_name", "family", "provider", "status", "aliases", "runtime",
+                "artifact", "model_context_window", "tested_context_window", "source", "verified_on"}
+RUNTIME_FIELDS = {"engine", "model_id", "format", "quantization"}
+ARTIFACT_FIELDS = {"repository", "file", "url", "revision", "sha256", "size_bytes"}
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 REVISION = re.compile(r"^[0-9a-f]{40}$")
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 def fail(message: str) -> int:
@@ -19,19 +28,54 @@ def fail(message: str) -> int:
     return 1
 
 
+def reject_duplicate_members(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON member {key!r}")
+        result[key] = value
+    return result
+
+
+def valid_date(value) -> bool:
+    if not isinstance(value, str) or not DATE.fullmatch(value):
+        return False
+    try:
+        datetime.date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
+
+
+def positive_int(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def unexpected_fields(value: dict, allowed: set[str]) -> list[str]:
+    return sorted(set(value) - allowed)
+
+
+def portable_file(value: str) -> bool:
+    path = PurePosixPath(value)
+    return bool(value) and "\\" not in value and not path.is_absolute() and value == path.as_posix() and ".." not in path.parts and "." not in path.parts
+
+
 def main() -> int:
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data" / "local-models.json"
     try:
-        catalog = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        catalog = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_members)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
         return fail(f"cannot read {path}: {exc}")
+    if not isinstance(catalog, dict):
+        return fail("catalog root must be an object")
+    extra = unexpected_fields(catalog, ROOT_FIELDS)
+    if extra:
+        return fail(f"catalog contains unsupported fields: {', '.join(extra)}")
     if catalog.get("schema") != "hiqs.local-model-catalog/1":
         return fail("schema must be 'hiqs.local-model-catalog/1'")
     if not re.fullmatch(r"\d+\.\d+\.\d+", str(catalog.get("version", ""))):
         return fail("version must be semver")
-    try:
-        datetime.date.fromisoformat(catalog.get("updated", ""))
-    except (TypeError, ValueError):
+    if not valid_date(catalog.get("updated")):
         return fail("updated must be a real YYYY-MM-DD date")
     models = catalog.get("models")
     if not isinstance(models, list) or not models:
@@ -39,7 +83,12 @@ def main() -> int:
 
     keys, aliases, runtime_ids = set(), set(), set()
     for index, model in enumerate(models):
+        if not isinstance(model, dict):
+            return fail(f"model {index} must be an object")
         where = f"model {index} ({model.get('key')!r})"
+        extra = unexpected_fields(model, MODEL_FIELDS)
+        if extra:
+            return fail(f"{where}: unsupported fields: {', '.join(extra)}")
         for field in ("key", "display_name", "family", "provider", "source"):
             if not isinstance(model.get(field), str) or not model[field].strip():
                 return fail(f"{where}: {field} missing or empty")
@@ -48,11 +97,12 @@ def main() -> int:
         keys.add(model["key"])
         if model.get("status") not in STATUSES:
             return fail(f"{where}: invalid status {model.get('status')!r}")
-        if not isinstance(model.get("context_window"), int) or model["context_window"] <= 0:
-            return fail(f"{where}: context_window must be a positive integer")
-        try:
-            datetime.date.fromisoformat(model.get("verified_on", ""))
-        except (TypeError, ValueError):
+        if not positive_int(model.get("model_context_window")):
+            return fail(f"{where}: model_context_window must be a positive integer")
+        tested = model.get("tested_context_window")
+        if tested is not None and (not positive_int(tested) or tested > model["model_context_window"]):
+            return fail(f"{where}: tested_context_window must be a positive integer no larger than model_context_window")
+        if not valid_date(model.get("verified_on")):
             return fail(f"{where}: verified_on must be a real YYYY-MM-DD date")
 
         model_aliases = model.get("aliases")
@@ -69,13 +119,17 @@ def main() -> int:
         runtime = model.get("runtime")
         if not isinstance(runtime, dict):
             return fail(f"{where}: runtime object missing")
-        for field in ("engine", "model_id", "format", "quantization"):
+        extra = unexpected_fields(runtime, RUNTIME_FIELDS)
+        if extra:
+            return fail(f"{where}: runtime contains unsupported fields: {', '.join(extra)}")
+        for field in RUNTIME_FIELDS:
             if not isinstance(runtime.get(field), str) or not runtime[field].strip():
                 return fail(f"{where}: runtime.{field} missing or empty")
-        if runtime["engine"] not in ENGINES:
-            return fail(f"{where}: unsupported engine {runtime['engine']!r}")
-        if runtime["format"] not in FORMATS:
-            return fail(f"{where}: unsupported format {runtime['format']!r}")
+        pair = (runtime["engine"], runtime["format"])
+        if pair not in RUNTIME_CONTRACTS:
+            return fail(f"{where}: unsupported engine/format pair {pair!r}")
+        if runtime["quantization"] not in RUNTIME_CONTRACTS[pair]:
+            return fail(f"{where}: unsupported quantization {runtime['quantization']!r} for {pair!r}")
         runtime_key = (runtime["engine"], runtime["model_id"])
         if runtime_key in runtime_ids:
             return fail(f"{where}: duplicate engine/model_id pair {runtime_key!r}")
@@ -84,17 +138,27 @@ def main() -> int:
         artifact = model.get("artifact")
         if not isinstance(artifact, dict):
             return fail(f"{where}: artifact object missing")
-        for field in ("repository", "file", "revision", "sha256"):
+        extra = unexpected_fields(artifact, ARTIFACT_FIELDS)
+        if extra:
+            return fail(f"{where}: artifact contains unsupported fields: {', '.join(extra)}")
+        for field in ("repository", "file", "url", "revision", "sha256"):
             if not isinstance(artifact.get(field), str) or not artifact[field].strip():
                 return fail(f"{where}: artifact.{field} missing or empty")
+        if not REPOSITORY.fullmatch(artifact["repository"]):
+            return fail(f"{where}: artifact.repository must be owner/repository")
+        if not portable_file(artifact["file"]):
+            return fail(f"{where}: artifact.file must be a portable relative path without traversal")
+        expected_url_prefix = f"https://huggingface.co/{artifact['repository']}/"
+        if (not artifact["url"].startswith(expected_url_prefix)
+                or f"/{artifact['revision']}/" not in artifact["url"]
+                or not artifact["url"].endswith(f"/{artifact['file']}")):
+            return fail(f"{where}: artifact.url must be an HTTPS Hugging Face URL pinned to artifact.revision")
         if not REVISION.fullmatch(artifact["revision"]):
             return fail(f"{where}: artifact.revision must be a 40-character lowercase Git SHA")
         if not SHA256.fullmatch(artifact["sha256"]):
             return fail(f"{where}: artifact.sha256 must be 64 lowercase hex characters")
-        if not isinstance(artifact.get("size_bytes"), int) or artifact["size_bytes"] <= 0:
+        if not positive_int(artifact.get("size_bytes")):
             return fail(f"{where}: artifact.size_bytes must be a positive integer")
-        if any(field in runtime or field in artifact for field in ("local_path", "endpoint", "credential")):
-            return fail(f"{where}: machine-specific paths, endpoints, and credentials are forbidden")
 
     engines = ", ".join(sorted({model["runtime"]["engine"] for model in models}))
     print(f"OK: {len(models)} local models ({engines}), version {catalog['version']}")

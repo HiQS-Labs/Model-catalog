@@ -59,16 +59,20 @@ class Resolver:
         if target not in ("native", "openrouter"):
             raise ValueError(f"target must be native|openrouter, got {target!r}")
         self.version = catalog["version"]
+        self.exact_ids: set[str] = set()
         self.by_phrase: dict[str, dict] = {}
         self.by_squash: dict[str, dict] = {}
         for row in catalog["aliases"]:
             if row["target"] != target:
                 continue
+            self.exact_ids.add(row["replace"])
             self.by_phrase.setdefault(_phrase(row["match"]), row)
             self.by_squash.setdefault(_squash(row["match"]), row)
 
     def resolve(self, query: str) -> Resolution:
         if not query.strip():
+            return Resolution(query=query, resolved=False, catalog_version=self.version)
+        if query in self.exact_ids:
             return Resolution(query=query, resolved=False, catalog_version=self.version)
         for tier, key in (("phrase", _phrase(query)), ("squash", _squash(query))):
             row = (self.by_phrase if tier == "phrase" else self.by_squash).get(key)
@@ -108,6 +112,8 @@ def _demo() -> int:
     assert native.resolve("gemini pro").model_id == "gemini-2.5-pro"           # flags don't block
     assert native.resolve("totally unknown model").resolved is False            # no default
     assert openrouter.resolve("z-ai/glm-5.2").resolved is False                 # exact ID untouched
+    assert native.resolve("CHAT-GPT").model_id == native.resolve("chat gpt").model_id
+    assert all(not native.resolve(row["replace"]).resolved for row in load_catalog(catalog_path)["aliases"] if row["target"] == "native")
     print("all contract assertions held")
     return 0
 

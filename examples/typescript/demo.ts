@@ -29,8 +29,16 @@ for (const [query, resolver] of cases) {
   }
 }
 
-// Contract assertions — the reference behavior in three lines.
-console.assert(native.resolve("gemini pro").modelId === "gemini-2.5-pro", "flags must not block");
-console.assert(native.resolve("totally unknown model").resolved === false, "no default on miss");
-console.assert(openrouter.resolve("z-ai/glm-5.2").resolved === false, "exact IDs pass through");
+function assert(condition: boolean, message: string): asserts condition {
+  if (!condition) throw new Error(`assertion failed: ${message}`);
+}
+
+assert(native.resolve("gemini pro").modelId === "gemini-2.5-pro", "flags must not block");
+assert(native.resolve("totally unknown model").resolved === false, "no default on miss");
+assert(openrouter.resolve("z-ai/glm-5.2").resolved === false, "exact IDs pass through");
+assert(native.resolve("CHAT-GPT").modelId === native.resolve("chat gpt").modelId, "squash is case-insensitive");
+for (const row of loadCatalog(catalogPath).aliases) {
+  const resolver = row.target === "native" ? native : openrouter;
+  assert(!resolver.resolve(row.replace).resolved, `exact ID ${row.replace} must pass through`);
+}
 console.log("all contract assertions held");

@@ -16,7 +16,8 @@ Every sample demonstrates the binding consumer contract (PROJECT.md → Consumer
   alphanumeric "squash"); never substring substitution.
 - **Miss = passthrough** — the resolver returns "unresolved" and your code validates the raw
   value against your provider catalog or refuses. No defaults, ever.
-- **Exact IDs pass through** — they are never declared keys, so they miss the table untouched.
+- **Exact IDs pass through** — each target's replacement IDs are checked before alias
+  normalization, preventing an ID that resembles an alias from being rewritten.
 - **Flags are advisory** — the flagged `gemini pro` row resolves normally with
   `flags=["unverified-generation"]` surfaced for logging/diagnostics.
 - **Provenance** — every resolution names the catalog version that produced it.

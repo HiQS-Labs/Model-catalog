@@ -14,11 +14,13 @@
       "artifact": {
         "repository": "openbmb/MiniCPM5-2B-GGUF",
         "file": "MiniCPM5-2B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/openbmb/MiniCPM5-2B-GGUF/resolve/c451f4d674096e6e6f1cc5d0abb6794bda638304/MiniCPM5-2B-Q4_K_M.gguf",
         "revision": "c451f4d674096e6e6f1cc5d0abb6794bda638304",
         "sha256": "ec2d5801640099e97d8d7e8003ad4d81f336e757811f03a26173dddf386602fd",
         "size_bytes": 1561318368
       },
-      "context_window": 131072,
+      "model_context_window": 131072,
+      "tested_context_window": 8192,
       "source": "https://huggingface.co/openbmb/MiniCPM5-2B-GGUF and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
       "verified_on": "2026-09-10"
     },
@@ -33,11 +35,12 @@
       "artifact": {
         "repository": "openbmb/MiniCPM5-2B-MLX",
         "file": "model.safetensors",
+        "url": "https://huggingface.co/openbmb/MiniCPM5-2B-MLX/resolve/3d00c3da500debfe345e60e25a87ed2669f5b1ee/model.safetensors",
         "revision": "3d00c3da500debfe345e60e25a87ed2669f5b1ee",
         "sha256": "c207798696a4a454e7ac211b25227625466c693335941cee8904fb922f295cc1",
         "size_bytes": 1416035216
       },
-      "context_window": 131072,
+      "model_context_window": 131072,
       "source": "https://huggingface.co/openbmb/MiniCPM5-2B-MLX and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
       "verified_on": "2026-09-10"
     }
