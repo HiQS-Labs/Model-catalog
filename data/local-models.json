@@ -21,7 +21,7 @@
       },
       "model_context_window": 131072,
       "tested_context_window": 8192,
-      "source": "https://huggingface.co/openbmb/MiniCPM5-2B-GGUF and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
+      "source": "docs/minicpm5-local-evidence.md and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
       "verified_on": "2026-09-10"
     },
     {
@@ -41,7 +41,7 @@
         "size_bytes": 1416035216
       },
       "model_context_window": 131072,
-      "source": "https://huggingface.co/openbmb/MiniCPM5-2B-MLX and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
+      "source": "docs/minicpm5-local-evidence.md and https://github.com/HiQS-Labs/MiniCPM-fork/issues/1",
       "verified_on": "2026-09-10"
     }
   ]

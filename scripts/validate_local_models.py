@@ -21,6 +21,7 @@ SHA256 = re.compile(r"^[0-9a-f]{64}$")
 REVISION = re.compile(r"^[0-9a-f]{40}$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+OLLAMA_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)?(?::[A-Za-z0-9][A-Za-z0-9._-]*)?$")
 
 
 def fail(message: str) -> int:
@@ -95,7 +96,7 @@ def main() -> int:
         if model["key"] in keys:
             return fail(f"{where}: duplicate key")
         keys.add(model["key"])
-        if model.get("status") not in STATUSES:
+        if not isinstance(model.get("status"), str) or model["status"] not in STATUSES:
             return fail(f"{where}: invalid status {model.get('status')!r}")
         if not positive_int(model.get("model_context_window")):
             return fail(f"{where}: model_context_window must be a positive integer")
@@ -130,6 +131,10 @@ def main() -> int:
             return fail(f"{where}: unsupported engine/format pair {pair!r}")
         if runtime["quantization"] not in RUNTIME_CONTRACTS[pair]:
             return fail(f"{where}: unsupported quantization {runtime['quantization']!r} for {pair!r}")
+        if runtime["engine"] == "ollama" and not OLLAMA_ID.fullmatch(runtime["model_id"]):
+            return fail(f"{where}: runtime.model_id must be a portable Ollama model name")
+        if runtime["engine"] == "mlx" and not REPOSITORY.fullmatch(runtime["model_id"]):
+            return fail(f"{where}: runtime.model_id must be a portable MLX owner/repository ID")
         runtime_key = (runtime["engine"], runtime["model_id"])
         if runtime_key in runtime_ids:
             return fail(f"{where}: duplicate engine/model_id pair {runtime_key!r}")
@@ -148,10 +153,8 @@ def main() -> int:
             return fail(f"{where}: artifact.repository must be owner/repository")
         if not portable_file(artifact["file"]):
             return fail(f"{where}: artifact.file must be a portable relative path without traversal")
-        expected_url_prefix = f"https://huggingface.co/{artifact['repository']}/"
-        if (not artifact["url"].startswith(expected_url_prefix)
-                or f"/{artifact['revision']}/" not in artifact["url"]
-                or not artifact["url"].endswith(f"/{artifact['file']}")):
+        expected_url = f"https://huggingface.co/{artifact['repository']}/resolve/{artifact['revision']}/{artifact['file']}"
+        if artifact["url"] != expected_url:
             return fail(f"{where}: artifact.url must be an HTTPS Hugging Face URL pinned to artifact.revision")
         if not REVISION.fullmatch(artifact["revision"]):
             return fail(f"{where}: artifact.revision must be a 40-character lowercase Git SHA")

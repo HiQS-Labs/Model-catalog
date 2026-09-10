@@ -114,8 +114,8 @@ Every release is git-tagged; consumers pin an **exact** version and record it wi
 
 `data/local-models.json` has an independent semver because it is a separate consumer contract:
 
-- **MAJOR** — local schema or required-field compatibility break, or a registration removal.
-- **MINOR** — registration, alias, runtime, or artifact change.
+- **MAJOR** — local schema or required-field compatibility break, registration removal, or alias removal.
+- **MINOR** — registration or alias addition, or runtime/artifact change.
 - **PATCH** — provenance-only metadata change.
 
 Any local-catalog content change must monotonically increase its `version` and advance `updated` to

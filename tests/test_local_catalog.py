@@ -51,6 +51,12 @@ class LocalCatalogTests(unittest.TestCase):
             ("absolute path", lambda d: d["models"][0]["artifact"].__setitem__("file", "/tmp/model.gguf"), "portable relative"),
             ("traversal", lambda d: d["models"][0]["artifact"].__setitem__("file", "../model.gguf"), "portable relative"),
             ("windows path", lambda d: d["models"][0]["artifact"].__setitem__("file", "models\\model.gguf"), "portable relative"),
+            ("runtime absolute path", lambda d: d["models"][0]["runtime"].__setitem__("model_id", "/Users/alice/model"), "portable Ollama"),
+            ("runtime traversal", lambda d: d["models"][0]["runtime"].__setitem__("model_id", "../model"), "portable Ollama"),
+            ("runtime endpoint", lambda d: d["models"][0]["runtime"].__setitem__("model_id", "http://localhost/model"), "portable Ollama"),
+            ("mutable URL", lambda d: d["models"][0]["artifact"].__setitem__("url", d["models"][0]["artifact"]["url"].replace(d["models"][0]["artifact"]["revision"], "main")), "pinned"),
+            ("blob URL", lambda d: d["models"][0]["artifact"].__setitem__("url", d["models"][0]["artifact"]["url"].replace("/resolve/", "/blob/")), "pinned"),
+            ("status object", lambda d: d["models"][0].__setitem__("status", []), "invalid status"),
             ("root machine field", lambda d: d.__setitem__("endpoint", "http://localhost"), "unsupported fields"),
             ("model machine field", lambda d: d["models"][0].__setitem__("local_path", "/tmp/x"), "unsupported fields"),
         ]:
@@ -90,6 +96,23 @@ class LocalCatalogTests(unittest.TestCase):
                 env={**os.environ, "CARGO_TARGET_DIR": str(Path(tmp) / "target")})
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unknown variant", result.stderr)
+
+    def test_validator_rejects_duplicate_catalog_identifiers(self):
+        duplicate_key = copy.deepcopy(self.local)
+        duplicate_key["models"][1]["key"] = duplicate_key["models"][0]["key"]
+        duplicate_alias = copy.deepcopy(self.local)
+        duplicate_alias["models"][1]["aliases"] = duplicate_alias["models"][0]["aliases"]
+        duplicate_runtime = copy.deepcopy(self.local)
+        duplicate_runtime["models"][1]["runtime"] = copy.deepcopy(duplicate_runtime["models"][0]["runtime"])
+        for broken, expected in [
+            (duplicate_key, "duplicate key"),
+            (duplicate_alias, "duplicate alias"),
+            (duplicate_runtime, "duplicate engine/model_id"),
+        ]:
+            with self.subTest(expected=expected):
+                result = self.validate(broken)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(expected, result.stdout)
 
 
 if __name__ == "__main__":

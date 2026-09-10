@@ -9,7 +9,7 @@
 //!      terminal (unresolved AND invalid), never a default.
 //!   3. No network at resolution time.
 //!   4. Report which catalog version resolved each turn.
-//!   5. Exact model IDs are never keys, so they miss the table and pass through.
+//!   5. Known exact model IDs bypass alias normalization and pass through.
 //!   6. Flags are advisory: flagged rows resolve normally; you log/surface them.
 //!
 //! Run: cargo run --manifest-path examples/rust/Cargo.toml
@@ -174,5 +174,13 @@ fn main() {
         let resolver = if row.target == Target::Native { &native } else { &openrouter };
         assert!(!resolver.resolve(&row.replace).resolved, "exact ID must pass through");
     }
+    let first = catalog.aliases.iter().find(|row| row.target == Target::Native && row.match_ == "gemini pro").unwrap().clone();
+    let mut duplicate = first.clone();
+    duplicate.match_ = "g.e.m.i.n.i.p.r.o".to_string();
+    duplicate.flags.clear();
+    let fixture = Catalog { schema: EXPECTED_SCHEMA.to_string(), version: "fixture".to_string(), aliases: vec![first.clone(), duplicate] };
+    let collision = Resolver::new(&fixture, Target::Native).resolve("GEMINI-PRO");
+    assert_eq!(collision.provider, first.provider);
+    assert_eq!(collision.flags, first.flags);
     println!("all contract assertions held");
 }

@@ -41,4 +41,9 @@ for (const row of loadCatalog(catalogPath).aliases) {
   const resolver = row.target === "native" ? native : openrouter;
   assert(!resolver.resolve(row.replace).resolved, `exact ID ${row.replace} must pass through`);
 }
+const fixture = loadCatalog(catalogPath);
+const first = fixture.aliases.find((row) => row.target === "native" && row.match === "gemini pro")!;
+fixture.aliases = [first, { ...first, match: "g.e.m.i.n.i.p.r.o", flags: [] }];
+const collision = new Resolver(fixture, "native").resolve("GEMINI-PRO");
+assert(collision.provider === first.provider && collision.flags.join() === first.flags.join(), "first collision row wins with metadata intact");
 console.log("all contract assertions held");

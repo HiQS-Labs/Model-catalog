@@ -1,12 +1,19 @@
 import json
+import importlib.util
+import io
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 GATE = ROOT / "scripts" / "check_version_bump.py"
+SPEC = importlib.util.spec_from_file_location("check_version_bump", GATE)
+GATE_MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(GATE_MODULE)
 
 
 class VersionGateTests(unittest.TestCase):
@@ -63,6 +70,35 @@ class VersionGateTests(unittest.TestCase):
         self.write("data/catalog.json", "1.0.1", "2026-09-01")
         self.commit("stale date")
         self.assertNotEqual(self.gate().returncode, 0)
+
+    def test_git_operation_failures_fail_closed(self):
+        ok = subprocess.CompletedProcess([], 0, "", "")
+        changed = subprocess.CompletedProcess([], 1, "", "")
+        failed = subprocess.CompletedProcess([], 2, "", "injected failure")
+        present = subprocess.CompletedProcess([], 0, "data/catalog.json\n", "")
+        scenarios = [
+            [ok, failed],
+            [ok, changed, failed],
+            [ok, changed, present, failed],
+        ]
+        argv = ["check_version_bump.py", "--base-ref", self.base, "--path", "data/catalog.json", "--today", "2026-09-10"]
+        for results in scenarios:
+            with self.subTest(results=[r.returncode for r in results]):
+                with mock.patch.object(GATE_MODULE, "git", side_effect=results), mock.patch.object(sys, "argv", argv), redirect_stdout(io.StringIO()):
+                    self.assertNotEqual(GATE_MODULE.main(), 0)
+
+    def test_explicit_base_fetch_works_in_shallow_clone(self):
+        subprocess.run(["git", "switch", "-qc", "feature"], cwd=self.repo, check=True)
+        self.write("data/catalog.json", "1.1.0", "2026-09-09")
+        self.commit("feature")
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = Path(tmp) / "clone"
+            subprocess.run(["git", "clone", "-q", "--depth=1", "--branch", "feature", f"file://{self.repo}", str(clone)], check=True)
+            subprocess.run(["git", "fetch", "-q", "--no-tags", "--depth=1", "origin", "+refs/heads/main:refs/remotes/origin/main"], cwd=clone, check=True)
+            result = subprocess.run(
+                [sys.executable, str(GATE), "--base-ref", "origin/main", "--path", "data/catalog.json", "--today", "2026-09-10"],
+                cwd=clone, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

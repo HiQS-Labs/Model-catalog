@@ -3,9 +3,9 @@ name: catalog-validate
 on:
   push:
     branches: [main]
-    paths: ["data/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
+    paths: ["data/**", "examples/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
   pull_request:
-    paths: ["data/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
+    paths: ["data/**", "examples/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
 
 jobs:
   validate:
