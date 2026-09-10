@@ -61,6 +61,9 @@ class LocalCatalogTests(unittest.TestCase):
             ("MLX dot owner", lambda d: d["models"][1]["runtime"].__setitem__("model_id", "./model"), "portable MLX"),
             ("MLX dot repo", lambda d: d["models"][1]["runtime"].__setitem__("model_id", "owner/.."), "portable MLX"),
             ("artifact traversal repo", lambda d: d["models"][0]["artifact"].__setitem__("repository", "../model"), "owner/repository"),
+            ("filename fragment", lambda d: (d["models"][0]["artifact"].__setitem__("file", "model.gguf#fragment"), d["models"][0]["artifact"].__setitem__("url", f"https://huggingface.co/{d['models'][0]['artifact']['repository']}/resolve/{d['models'][0]['artifact']['revision']}/model.gguf#fragment")), "portable relative"),
+            ("filename query", lambda d: (d["models"][0]["artifact"].__setitem__("file", "model.gguf?raw=1"), d["models"][0]["artifact"].__setitem__("url", f"https://huggingface.co/{d['models'][0]['artifact']['repository']}/resolve/{d['models'][0]['artifact']['revision']}/model.gguf?raw=1")), "portable relative"),
+            ("filename percent escape", lambda d: (d["models"][0]["artifact"].__setitem__("file", "model%2Esguf"), d["models"][0]["artifact"].__setitem__("url", f"https://huggingface.co/{d['models'][0]['artifact']['repository']}/resolve/{d['models'][0]['artifact']['revision']}/model%2Esguf")), "portable relative"),
             ("status object", lambda d: d["models"][0].__setitem__("status", []), "invalid status"),
             ("root machine field", lambda d: d.__setitem__("endpoint", "http://localhost"), "unsupported fields"),
             ("model machine field", lambda d: d["models"][0].__setitem__("local_path", "/tmp/x"), "unsupported fields"),
@@ -122,6 +125,13 @@ class LocalCatalogTests(unittest.TestCase):
     def test_valid_owner_repository_identifier_is_accepted(self):
         valid = copy.deepcopy(self.local)
         valid["models"][1]["runtime"]["model_id"] = "owner-name/repo.name_2"
+        self.assertEqual(self.validate(valid).returncode, 0)
+
+    def test_valid_nested_artifact_path_is_accepted(self):
+        valid = copy.deepcopy(self.local)
+        artifact = valid["models"][0]["artifact"]
+        artifact["file"] = "weights/model.gguf"
+        artifact["url"] = f"https://huggingface.co/{artifact['repository']}/resolve/{artifact['revision']}/{artifact['file']}"
         self.assertEqual(self.validate(valid).returncode, 0)
 
 

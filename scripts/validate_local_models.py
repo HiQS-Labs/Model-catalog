@@ -58,7 +58,9 @@ def unexpected_fields(value: dict, allowed: set[str]) -> list[str]:
 
 def portable_file(value: str) -> bool:
     path = PurePosixPath(value)
-    return bool(value) and "\\" not in value and not path.is_absolute() and value == path.as_posix() and ".." not in path.parts and "." not in path.parts
+    return (bool(value) and not any(char in value for char in "\\%?#")
+            and not path.is_absolute() and value == path.as_posix()
+            and ".." not in path.parts and "." not in path.parts)
 
 
 def repository_id(value: str) -> bool:
