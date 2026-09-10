@@ -22,7 +22,7 @@ def fail(message: str) -> int:
 def main() -> int:
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data" / "local-models.json"
     try:
-        catalog = json.loads(path.read_text())
+        catalog = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return fail(f"cannot read {path}: {exc}")
     if catalog.get("schema") != "hiqs.local-model-catalog/1":

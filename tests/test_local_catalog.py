@@ -13,13 +13,13 @@ VALIDATOR = ROOT / "scripts" / "validate_local_models.py"
 
 class LocalCatalogTests(unittest.TestCase):
     def setUp(self):
-        self.catalog = json.loads(CATALOG.read_text())
-        self.local = json.loads(LOCAL_MODELS.read_text())
+        self.catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+        self.local = json.loads(LOCAL_MODELS.read_text(encoding="utf-8"))
 
     def validate(self, data):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "local-models.json"
-            path.write_text(json.dumps(data))
+            path.write_text(json.dumps(data), encoding="utf-8")
             return subprocess.run(
                 [sys.executable, str(VALIDATOR), str(path)],
                 text=True,

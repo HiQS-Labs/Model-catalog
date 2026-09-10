@@ -53,3 +53,20 @@ jobs:
               exit 1
             fi
           fi
+      - name: Local catalog changes require a version and date bump
+        if: github.event_name == 'pull_request'
+        run: |
+          base_json="$(git show "origin/${{ github.base_ref }}:data/local-models.json" 2>/dev/null || true)"
+          head_json="$(cat data/local-models.json)"
+          changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/local-models.json || true)"
+          [ -n "$changed" ] || exit 0
+          head_version="$(printf '%s' "$head_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')"
+          head_updated="$(printf '%s' "$head_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["updated"])')"
+          today="$(date -u +%Y-%m-%d)"
+          if [ -z "$base_json" ]; then
+            [ "$head_version" = "1.0.0" ] || { echo "FAIL: first local catalog must start at 1.0.0"; exit 1; }
+          else
+            base_version="$(printf '%s' "$base_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')"
+            [ "$base_version" != "$head_version" ] || { echo "FAIL: local catalog changed without a version bump"; exit 1; }
+          fi
+          [ "$head_updated" = "$today" ] || { echo "FAIL: local catalog updated must be $today"; exit 1; }

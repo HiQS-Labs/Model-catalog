@@ -86,6 +86,11 @@ Workflow:
 5. A maintainer reviews and tags the release; each consumer then PRs its own pin-bump/sync. Two
    PRs of friction is the deliberate price of pinned provenance — see PROJECT.md → Governance.
 
+Local registrations are authored directly in `data/local-models.json`; they are not generated from
+`data/models.json` and `data/aliases.json`. Add one complete model object, pin the upstream revision
+and artifact hash, then run `python3 scripts/validate_local_models.py` and
+`python3 -m unittest discover -s tests -v`. Do not add local rows to `data/catalog.json`.
+
 ## Versioning
 
 Semver on a data file, judged by what the change does to resolution:
@@ -97,6 +102,15 @@ Semver on a data file, judged by what the change does to resolution:
 - **PATCH** — provenance-only metadata (`source`, `verified_on`): zero resolution change.
 
 Every release is git-tagged; consumers pin an **exact** version and record it with each resolution.
+
+`data/local-models.json` has an independent semver because it is a separate consumer contract:
+
+- **MAJOR** — local schema or required-field compatibility break, or a registration removal.
+- **MINOR** — registration, alias, runtime, or artifact change.
+- **PATCH** — provenance-only metadata change.
+
+Any local-catalog content change must bump its `version` and set `updated` to the change date. The
+repository release tag covers both feeds; local consumers record the local feed's own version.
 
 ## License
 
