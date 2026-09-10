@@ -10,7 +10,7 @@
  *      (unresolved AND invalid), never a default.
  *   3. No network at resolution time.
  *   4. Report which catalog version resolved each turn.
- *   5. Exact model IDs are never keys, so they miss the table and pass through.
+ *   5. Known exact model IDs bypass alias normalization and pass through.
  *   6. Flags are advisory: flagged rows resolve normally; you log/surface them.
  *
  * Run: npx tsx examples/typescript/demo.ts
@@ -63,6 +63,7 @@ export function loadCatalog(p: string): Catalog {
 
 export class Resolver {
   readonly version: string;
+  readonly #exactIds: Set<string>;
   readonly #byPhrase: Map<string, CatalogRow>;
   readonly #bySquash: Map<string, CatalogRow>;
 
@@ -71,18 +72,21 @@ export class Resolver {
       throw new Error(`target must be native|openrouter, got ${target}`);
     }
     this.version = catalog.version;
+    this.#exactIds = new Set();
     this.#byPhrase = new Map();
     this.#bySquash = new Map();
     for (const row of catalog.aliases) {
       if (row.target !== target) continue;
-      this.#byPhrase.set(phrase(row.match), row);
-      this.#bySquash.set(squash(row.match), row);
+      this.#exactIds.add(row.replace);
+      if (!this.#byPhrase.has(phrase(row.match))) this.#byPhrase.set(phrase(row.match), row);
+      if (!this.#bySquash.has(squash(row.match))) this.#bySquash.set(squash(row.match), row);
     }
   }
 
   resolve(query: string): Resolution {
     const base: Resolution = { query, resolved: false, flags: [], catalogVersion: this.version };
     if (!query.trim()) return base;
+    if (this.#exactIds.has(query)) return base;
     for (const [matchedOn, key, table] of [
       ["phrase", phrase(query), this.#byPhrase],
       ["squash", squash(query), this.#bySquash],

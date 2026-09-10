@@ -9,6 +9,8 @@ Consumed today (or planned) by:
 - **XYZ-forge** — `resolve-model-alias.sh` / `resolve-profile.sh` (GH-346 Phase 3a) via the
   `target: "openrouter"` rows.
 - **AEGIS-Sleuth-Slackbot** — the GH-168 model alias resolver via the `target: "native"` rows.
+- **Local runtime tooling** — portable Ollama / MLX registrations from the separate
+  [`data/local-models.json`](data/local-models.json) feed.
 
 Canonical plan: [PROJECT.md](PROJECT.md) · canonical issue: [#1](https://github.com/HiQS-Labs/Model-catalog/issues/1).
 
@@ -41,9 +43,28 @@ catalog, which is not this repo's concern.
    terminal state (unresolved **and** invalid), never a default.
 3. No network at resolution time.
 4. Record which catalog version resolved a turn (provenance).
-5. Exact model IDs are never declared keys, so they always pass through untouched.
+5. Exact model IDs are collected from each target's `replace` values and checked before alias
+   normalization, so they always pass through untouched even if an ID normalizes to an alias.
 6. **Flagged rows resolve normally.** `flags` are advisory metadata (logged, surfaced in
    diagnostics), never a refusal reason — both consumers must behave identically on flagged rows.
+
+### Local model registrations
+
+Local models live in [`data/local-models.json`](data/local-models.json), a separate
+`hiqs.local-model-catalog/1` feed. Keeping it separate is a compatibility boundary: existing v1
+alias consumers deserialize a closed `native | openrouter` target vocabulary, so inserting a new
+target into `data/catalog.json` would break them before target filtering occurs.
+
+Each local registration records stable aliases, the runtime-facing model ID, engine, format,
+quantization, upstream repository/file, revision-specific download URL, pinned revision, SHA-256,
+byte size, advertised model context window, optional tested context window,
+provenance, and verification date. It deliberately excludes machine-specific paths, endpoints,
+credentials, and mutable runtime state. Validate both feeds with:
+
+```bash
+python3 scripts/validate_catalog.py
+python3 scripts/validate_local_models.py
+```
 
 Known deviations carried as data (not silently): bare `gpt` is pinned to the vendor default
 `gpt-5.6-terra`, not the flagship `gpt-6-astra` (which has its own explicit rows) — the everyday
@@ -67,6 +88,18 @@ Workflow:
 5. A maintainer reviews and tags the release; each consumer then PRs its own pin-bump/sync. Two
    PRs of friction is the deliberate price of pinned provenance — see PROJECT.md → Governance.
 
+Local registrations are authored directly in `data/local-models.json`; they are not generated from
+`data/models.json` and `data/aliases.json`. Add one complete model object, pin the upstream revision
+and artifact hash, then run `python3 scripts/validate_local_models.py` and
+`python3 -m unittest discover -s tests -v`. Do not add local rows to `data/catalog.json`.
+
+For Ollama, download the catalog's revision-specific GGUF URL, verify its SHA-256 and byte size,
+then create the cataloged `runtime.model_id` with a `Modelfile` whose `FROM` points to that verified
+file. For MLX, download the **entire repository snapshot at `artifact.revision`** (configuration,
+tokenizer, and weights), then verify the cataloged weight file; the single-file hash is not a claim
+that the rest of a mutable repository is pinned. `model_context_window` is upstream capability,
+while `tested_context_window` records only a context size actually exercised by the cited work.
+
 ## Versioning
 
 Semver on a data file, judged by what the change does to resolution:
@@ -78,6 +111,16 @@ Semver on a data file, judged by what the change does to resolution:
 - **PATCH** — provenance-only metadata (`source`, `verified_on`): zero resolution change.
 
 Every release is git-tagged; consumers pin an **exact** version and record it with each resolution.
+
+`data/local-models.json` has an independent semver because it is a separate consumer contract:
+
+- **MAJOR** — local schema or required-field compatibility break, registration removal, or alias removal.
+- **MINOR** — registration or alias addition, or runtime/artifact change.
+- **PATCH** — provenance-only metadata change.
+
+Any local-catalog content change must monotonically increase its `version` and advance `updated` to
+the change date (never later than the CI date). The
+repository release tag covers both feeds; local consumers record the local feed's own version.
 
 ## License
 

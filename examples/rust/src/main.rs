@@ -9,13 +9,13 @@
 //!      terminal (unresolved AND invalid), never a default.
 //!   3. No network at resolution time.
 //!   4. Report which catalog version resolved each turn.
-//!   5. Exact model IDs are never keys, so they miss the table and pass through.
+//!   5. Known exact model IDs bypass alias normalization and pass through.
 //!   6. Flags are advisory: flagged rows resolve normally; you log/surface them.
 //!
 //! Run: cargo run --manifest-path examples/rust/Cargo.toml
 
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 const EXPECTED_SCHEMA: &str = "hiqs.model-catalog/1";
@@ -62,11 +62,12 @@ fn phrase(s: &str) -> String {
 
 fn squash(s: &str) -> String {
     // Tier 2: alphanumerics only (XYZ-style squash). Entire-value still.
-    s.chars().filter(|c| c.is_ascii_alphanumeric()).collect()
+    s.to_ascii_lowercase().chars().filter(|c| c.is_ascii_alphanumeric()).collect()
 }
 
 struct Resolver {
     version: String,
+    exact_ids: HashSet<String>,
     by_phrase: HashMap<String, CatalogRow>,
     by_squash: HashMap<String, CatalogRow>,
 }
@@ -75,14 +76,16 @@ impl Resolver {
     fn new(catalog: &Catalog, target: Target) -> Self {
         let mut by_phrase = HashMap::new();
         let mut by_squash = HashMap::new();
+        let mut exact_ids = HashSet::new();
         for row in &catalog.aliases {
             if row.target != target {
                 continue;
             }
+            exact_ids.insert(row.replace.clone());
             by_phrase.entry(phrase(&row.match_)).or_insert_with(|| row.clone());
             by_squash.entry(squash(&row.match_)).or_insert_with(|| row.clone());
         }
-        Resolver { version: catalog.version.clone(), by_phrase, by_squash }
+        Resolver { version: catalog.version.clone(), exact_ids, by_phrase, by_squash }
     }
 
     fn resolve(&self, query: &str) -> Resolution {
@@ -94,7 +97,7 @@ impl Resolver {
             matched_on: "",
             catalog_version: self.version.clone(),
         };
-        if query.trim().is_empty() {
+        if query.trim().is_empty() || self.exact_ids.contains(query) {
             return miss;
         }
         for (matched_on, key, table) in [
@@ -166,5 +169,18 @@ fn main() {
     assert_eq!(native.resolve("gemini pro").model_id, "gemini-2.5-pro"); // flags don't block
     assert!(!native.resolve("totally unknown model").resolved); // no default
     assert!(!openrouter.resolve("z-ai/glm-5.2").resolved); // exact IDs pass through
+    assert_eq!(native.resolve("CHAT-GPT").model_id, native.resolve("chat gpt").model_id);
+    for row in &catalog.aliases {
+        let resolver = if row.target == Target::Native { &native } else { &openrouter };
+        assert!(!resolver.resolve(&row.replace).resolved, "exact ID must pass through");
+    }
+    let first = catalog.aliases.iter().find(|row| row.target == Target::Native && row.match_ == "gemini pro").unwrap().clone();
+    let mut duplicate = first.clone();
+    duplicate.match_ = "g.e.m.i.n.i.p.r.o".to_string();
+    duplicate.flags.clear();
+    let fixture = Catalog { schema: EXPECTED_SCHEMA.to_string(), version: "fixture".to_string(), aliases: vec![first.clone(), duplicate] };
+    let collision = Resolver::new(&fixture, Target::Native).resolve("GEMINI-PRO");
+    assert_eq!(collision.provider, first.provider);
+    assert_eq!(collision.flags, first.flags);
     println!("all contract assertions held");
 }

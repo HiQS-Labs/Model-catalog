@@ -10,7 +10,7 @@ It demonstrates the binding consumer contract (PROJECT.md -> Consumer contract):
      terminal (unresolved AND invalid), never a default.
   3. No network at resolution time.
   4. Report which catalog version resolved each turn.
-  5. Exact model IDs are never keys, so they miss the table and pass through.
+  5. Known exact model IDs bypass alias normalization and pass through.
   6. Flags are advisory: flagged rows resolve normally; you log/surface them.
 """
 
@@ -59,16 +59,20 @@ class Resolver:
         if target not in ("native", "openrouter"):
             raise ValueError(f"target must be native|openrouter, got {target!r}")
         self.version = catalog["version"]
+        self.exact_ids: set[str] = set()
         self.by_phrase: dict[str, dict] = {}
         self.by_squash: dict[str, dict] = {}
         for row in catalog["aliases"]:
             if row["target"] != target:
                 continue
+            self.exact_ids.add(row["replace"])
             self.by_phrase.setdefault(_phrase(row["match"]), row)
             self.by_squash.setdefault(_squash(row["match"]), row)
 
     def resolve(self, query: str) -> Resolution:
         if not query.strip():
+            return Resolution(query=query, resolved=False, catalog_version=self.version)
+        if query in self.exact_ids:
             return Resolution(query=query, resolved=False, catalog_version=self.version)
         for tier, key in (("phrase", _phrase(query)), ("squash", _squash(query))):
             row = (self.by_phrase if tier == "phrase" else self.by_squash).get(key)
@@ -108,6 +112,14 @@ def _demo() -> int:
     assert native.resolve("gemini pro").model_id == "gemini-2.5-pro"           # flags don't block
     assert native.resolve("totally unknown model").resolved is False            # no default
     assert openrouter.resolve("z-ai/glm-5.2").resolved is False                 # exact ID untouched
+    assert native.resolve("CHAT-GPT").model_id == native.resolve("chat gpt").model_id
+    assert all(not native.resolve(row["replace"]).resolved for row in load_catalog(catalog_path)["aliases"] if row["target"] == "native")
+    collision = load_catalog(catalog_path)
+    first = next(row for row in collision["aliases"] if row["target"] == "native" and row["match"] == "gemini pro")
+    duplicate = dict(first, match="g.e.m.i.n.i.p.r.o", flags=[])
+    collision["aliases"] = [first, duplicate]
+    collision_result = Resolver(collision, "native").resolve("GEMINI-PRO")
+    assert collision_result.provider == first["provider"] and collision_result.flags == tuple(first["flags"])
     print("all contract assertions held")
     return 0
 

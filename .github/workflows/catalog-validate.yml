@@ -3,9 +3,9 @@ name: catalog-validate
 on:
   push:
     branches: [main]
-    paths: ["data/**", "scripts/**", ".github/workflows/catalog-validate.yml"]
+    paths: ["data/**", "examples/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
   pull_request:
-    paths: ["data/**", "scripts/**", ".github/workflows/catalog-validate.yml"]
+    paths: ["data/**", "examples/**", "scripts/**", "tests/**", ".github/workflows/catalog-validate.yml"]
 
 jobs:
   validate:
@@ -19,6 +19,15 @@ jobs:
         run: python3 scripts/generate_catalog.py --check
       - name: Schema rules (uniqueness, vocabulary, dates, bare-word stability)
         run: python3 scripts/validate_catalog.py
+      - name: Local model schema rules
+        run: python3 scripts/validate_local_models.py
+      - name: Compatibility and local-runtime tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Reference consumers enforce the shared contract
+        run: |
+          python3 examples/python/model_catalog.py
+          cargo run --quiet --manifest-path examples/rust/Cargo.toml
+          npx --yes tsx examples/typescript/demo.ts
       - name: Renderer runs clean and emits exactly the openrouter rows
         run: |
           out="$(python3 scripts/render_openrouter.py)"
@@ -29,23 +38,9 @@ jobs:
       - name: Catalog changes require a version bump
         if: github.event_name == 'pull_request'
         run: |
-          git fetch --depth=1 origin "${{ github.base_ref }}"
-          read -r base_version base_updated <<<"$(git show "origin/${{ github.base_ref }}:data/catalog.json" 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["version"], d["updated"])' 2>/dev/null || echo none none)"
-          read -r head_version head_updated <<<"$(python3 -c 'import json; d=json.load(open("data/catalog.json")); print(d["version"], d["updated"])')"
-          echo "base=$base_version/$base_updated head=$head_version/$head_updated"
-          changed="$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- data/catalog.json || true)"
-          today="$(date -u +%Y-%m-%d)"
-          if [ -n "$changed" ]; then
-            if [ "$base_version" = "none" ]; then
-              echo "FAIL: could not read the base catalog to compare versions (fail closed; see PROJECT.md → Versioning)"
-              exit 1
-            fi
-            if [ "$base_version" = "$head_version" ]; then
-              echo "FAIL: data/catalog.json changed but version was not bumped (stayed $head_version)"
-              exit 1
-            fi
-            if [ "$base_updated" = "$head_updated" ] && [ "$head_updated" != "$today" ]; then
-              echo "FAIL: data/catalog.json changed but updated was not bumped to today ($today)"
-              exit 1
-            fi
-          fi
+          git fetch --no-tags --depth=1 origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          python3 scripts/check_version_bump.py --base-ref "origin/${{ github.base_ref }}" --path data/catalog.json
+      - name: Local catalog changes require a version and date bump
+        if: github.event_name == 'pull_request'
+        run: |
+          python3 scripts/check_version_bump.py --base-ref "origin/${{ github.base_ref }}" --path data/local-models.json --initial-version 1.0.0
